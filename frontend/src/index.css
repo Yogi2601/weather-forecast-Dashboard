@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+@keyframes floatCloud {
+  0% {
+    transform: translateX(-20%) translateY(0);
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateX(140%) translateY(8px);
+    opacity: 0.2;
+  }
+}
+
+@keyframes cloudDrift {
+  0% { transform: translateX(-120%) translateY(0); opacity: 0.35; }
+  20% { opacity: 0.75; }
+  100% { transform: translateX(140%) translateY(10px); opacity: 0.35; }
+}
+
+@keyframes rainFall {
+  0% { transform: translateY(-20vh) rotate(0deg); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(120vh) rotate(6deg); opacity: 0.9; }
+}
+
+@keyframes snowFall {
+  0% { transform: translateY(-20vh) translateX(0); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(120vh) translateX(12px); opacity: 0.8; }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(0.95); opacity: 0.75; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes flash {
+  0%, 90%, 100% { opacity: 0; }
+  5%, 15% { opacity: 0.2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+/* Premium scrollbar */
+
+.custom-scrollbar::-webkit-scrollbar {
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #0f172a;
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #60a5fa;
+}
+
+.custom-scrollbar {
+  scrollbar-color: #3b82f6 #0f172a;
+  scrollbar-width: thin;
+}

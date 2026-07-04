@@ -1,0 +1,108 @@
+2026-07-03 14:11:28,669 - __main__ - INFO - ================================================================================
+2026-07-03 14:11:28,669 - __main__ - INFO - Weather Refresh Started
+2026-07-03 14:11:28,669 - __main__ - INFO - ================================================================================
+2026-07-03 14:11:28,692 - app.scheduler - INFO - Starting daily refresh for 23 location(s)
+2026-07-03 14:11:28,693 - app.scheduler - INFO - Refreshing: Pune
+2026-07-03 14:11:33,976 - app.scheduler - INFO - Pune: 366 new records inserted
+2026-07-03 14:11:33,977 - app.scheduler - INFO - Refreshing: Mumbai
+2026-07-03 14:11:36,610 - app.scheduler - INFO - Mumbai: 366 new records inserted
+2026-07-03 14:11:36,611 - app.scheduler - INFO - Refreshing: San Francisco
+2026-07-03 14:11:39,373 - app.scheduler - INFO - San Francisco: 366 new records inserted
+2026-07-03 14:11:39,374 - app.scheduler - INFO - Refreshing: konkan
+2026-07-03 14:11:42,959 - app.scheduler - INFO - konkan: 366 new records inserted
+2026-07-03 14:11:42,959 - app.scheduler - INFO - Refreshing: Tokyo
+2026-07-03 14:11:47,478 - app.scheduler - INFO - Tokyo: 366 new records inserted
+2026-07-03 14:11:47,478 - app.scheduler - INFO - Refreshing: London
+2026-07-03 14:11:50,121 - app.scheduler - INFO - London: 366 new records inserted
+2026-07-03 14:11:50,121 - app.scheduler - INFO - Refreshing: New York
+2026-07-03 14:11:56,530 - app.scheduler - INFO - New York: 366 new records inserted
+2026-07-03 14:11:56,531 - app.scheduler - INFO - Refreshing: South korea
+2026-07-03 14:11:59,504 - app.scheduler - INFO - South korea: 366 new records inserted
+2026-07-03 14:11:59,504 - app.scheduler - INFO - Refreshing: Kedarnath
+2026-07-03 14:12:05,081 - app.scheduler - INFO - Kedarnath: 366 new records inserted
+2026-07-03 14:12:05,082 - app.scheduler - INFO - Refreshing: Paris
+2026-07-03 14:12:08,013 - app.scheduler - INFO - Paris: 366 new records inserted
+2026-07-03 14:12:08,014 - app.scheduler - INFO - Refreshing: Berlin
+2026-07-03 14:12:12,167 - app.scheduler - INFO - Berlin: 366 new records inserted
+2026-07-03 14:12:12,168 - app.scheduler - INFO - Refreshing: America
+2026-07-03 14:12:14,895 - app.scheduler - INFO - America: 366 new records inserted
+2026-07-03 14:12:14,896 - app.scheduler - INFO - Refreshing: Lesotho
+2026-07-03 14:12:20,188 - app.scheduler - INFO - Lesotho: 366 new records inserted
+2026-07-03 14:12:20,188 - app.scheduler - INFO - Refreshing: jalgaon
+2026-07-03 14:12:26,342 - app.scheduler - INFO - jalgaon: 366 new records inserted
+2026-07-03 14:12:26,342 - app.scheduler - INFO - Refreshing: Japan
+2026-07-03 14:12:29,007 - app.scheduler - INFO - Japan: 366 new records inserted
+2026-07-03 14:12:29,007 - app.scheduler - INFO - Refreshing: City of Westminster
+2026-07-03 14:12:33,779 - app.scheduler - INFO - City of Westminster: 366 new records inserted
+2026-07-03 14:12:33,780 - app.scheduler - INFO - Refreshing: Mudigi
+2026-07-03 14:12:36,817 - app.scheduler - INFO - Mudigi: 366 new records inserted
+2026-07-03 14:12:36,818 - app.scheduler - INFO - Refreshing: Seoul
+2026-07-03 14:12:39,587 - app.scheduler - INFO - Seoul: 366 new records inserted
+2026-07-03 14:12:39,588 - app.scheduler - INFO - Refreshing: United Kingdom
+2026-07-03 14:12:42,254 - app.scheduler - INFO - United Kingdom: 366 new records inserted
+2026-07-03 14:12:42,255 - app.scheduler - INFO - Refreshing: Sydney
+2026-07-03 14:12:44,941 - app.scheduler - INFO - Sydney: 366 new records inserted
+2026-07-03 14:12:44,942 - app.scheduler - INFO - Refreshing: Bariloche
+2026-07-03 14:12:48,888 - app.scheduler - INFO - Bariloche: 366 new records inserted
+2026-07-03 14:12:48,888 - app.scheduler - INFO - Refreshing: Argentina
+2026-07-03 14:12:51,610 - app.scheduler - INFO - Argentina: 366 new records inserted
+2026-07-03 14:12:51,611 - app.scheduler - INFO - Refreshing: Puducherry
+2026-07-03 14:12:57,551 - app.scheduler - INFO - Puducherry: 366 new records inserted
+2026-07-03 14:12:57,551 - app.scheduler - INFO - Daily refresh complete: 23 succeeded, 0 failed. Failed: none
+2026-07-03 14:12:57,552 - __main__ - INFO - ================================================================================
+2026-07-03 14:12:57,552 - __main__ - INFO - Weather Refresh Completed
+2026-07-03 14:12:57,552 - __main__ - INFO - ================================================================================
+2026-07-03 14:15:44,498 - __main__ - INFO - ================================================================================
+2026-07-03 14:15:44,498 - __main__ - INFO - Weather Refresh Started
+2026-07-03 14:15:44,498 - __main__ - INFO - ================================================================================
+2026-07-03 14:15:44,521 - app.scheduler - INFO - Starting daily refresh for 23 location(s)
+2026-07-03 14:15:44,522 - app.scheduler - INFO - Refreshing: Pune
+2026-07-03 14:15:45,423 - app.scheduler - INFO - Pune: Already up to date
+2026-07-03 14:15:45,423 - app.scheduler - INFO - Refreshing: Mumbai
+2026-07-03 14:15:49,785 - app.scheduler - INFO - Mumbai: Already up to date
+2026-07-03 14:15:49,785 - app.scheduler - INFO - Refreshing: San Francisco
+2026-07-03 14:15:51,540 - app.scheduler - INFO - San Francisco: Already up to date
+2026-07-03 14:15:51,540 - app.scheduler - INFO - Refreshing: konkan
+2026-07-03 14:15:52,406 - app.scheduler - INFO - konkan: Already up to date
+2026-07-03 14:15:52,406 - app.scheduler - INFO - Refreshing: Tokyo
+2026-07-03 14:15:53,239 - app.scheduler - INFO - Tokyo: Already up to date
+2026-07-03 14:15:53,239 - app.scheduler - INFO - Refreshing: London
+2026-07-03 14:15:54,067 - app.scheduler - INFO - London: Already up to date
+2026-07-03 14:15:54,067 - app.scheduler - INFO - Refreshing: New York
+2026-07-03 14:15:54,955 - app.scheduler - INFO - New York: Already up to date
+2026-07-03 14:15:54,955 - app.scheduler - INFO - Refreshing: South korea
+2026-07-03 14:15:55,792 - app.scheduler - INFO - South korea: Already up to date
+2026-07-03 14:15:55,792 - app.scheduler - INFO - Refreshing: Kedarnath
+2026-07-03 14:15:56,623 - app.scheduler - INFO - Kedarnath: Already up to date
+2026-07-03 14:15:56,623 - app.scheduler - INFO - Refreshing: Paris
+2026-07-03 14:15:57,511 - app.scheduler - INFO - Paris: Already up to date
+2026-07-03 14:15:57,511 - app.scheduler - INFO - Refreshing: Berlin
+2026-07-03 14:16:02,183 - app.scheduler - INFO - Berlin: Already up to date
+2026-07-03 14:16:02,183 - app.scheduler - INFO - Refreshing: America
+2026-07-03 14:16:02,961 - app.scheduler - INFO - America: Already up to date
+2026-07-03 14:16:02,961 - app.scheduler - INFO - Refreshing: Lesotho
+2026-07-03 14:16:06,955 - app.scheduler - INFO - Lesotho: Already up to date
+2026-07-03 14:16:06,955 - app.scheduler - INFO - Refreshing: jalgaon
+2026-07-03 14:16:08,040 - app.scheduler - INFO - jalgaon: Already up to date
+2026-07-03 14:16:08,040 - app.scheduler - INFO - Refreshing: Japan
+2026-07-03 14:16:08,763 - app.scheduler - INFO - Japan: Already up to date
+2026-07-03 14:16:08,763 - app.scheduler - INFO - Refreshing: City of Westminster
+2026-07-03 14:16:10,907 - app.scheduler - INFO - City of Westminster: Already up to date
+2026-07-03 14:16:10,908 - app.scheduler - INFO - Refreshing: Mudigi
+2026-07-03 14:16:14,182 - app.scheduler - INFO - Mudigi: Already up to date
+2026-07-03 14:16:14,182 - app.scheduler - INFO - Refreshing: Seoul
+2026-07-03 14:16:15,112 - app.scheduler - INFO - Seoul: Already up to date
+2026-07-03 14:16:15,112 - app.scheduler - INFO - Refreshing: United Kingdom
+2026-07-03 14:16:19,698 - app.scheduler - INFO - United Kingdom: Already up to date
+2026-07-03 14:16:19,698 - app.scheduler - INFO - Refreshing: Sydney
+2026-07-03 14:16:20,594 - app.scheduler - INFO - Sydney: Already up to date
+2026-07-03 14:16:20,594 - app.scheduler - INFO - Refreshing: Bariloche
+2026-07-03 14:16:21,469 - app.scheduler - INFO - Bariloche: Already up to date
+2026-07-03 14:16:21,470 - app.scheduler - INFO - Refreshing: Argentina
+2026-07-03 14:16:22,288 - app.scheduler - INFO - Argentina: Already up to date
+2026-07-03 14:16:22,288 - app.scheduler - INFO - Refreshing: Puducherry
+2026-07-03 14:16:23,191 - app.scheduler - INFO - Puducherry: Already up to date
+2026-07-03 14:16:23,192 - app.scheduler - INFO - Daily refresh complete: 23 succeeded, 0 failed. Failed: none
+2026-07-03 14:16:23,192 - __main__ - INFO - ================================================================================
+2026-07-03 14:16:23,192 - __main__ - INFO - Weather Refresh Completed
+2026-07-03 14:16:23,192 - __main__ - INFO - ================================================================================

@@ -1,0 +1,152 @@
+================================================================================
+TESTING THE FIXED SCHEDULER SCRIPT
+================================================================================
+
+STEP 1: VERIFY SYNTAX IS FIXED
+================================================================================
+
+Run this in ANY PowerShell window (no admin needed):
+
+  $ScriptPath = "C:\Users\Owner\Documents\weather-dashboard\backend\setup_scheduler.ps1"
+  $errors = @()
+  [System.Management.Automation.PSParser]::Tokenize((Get-Content $ScriptPath -Raw), [ref]$errors)
+  if ($errors.Count -eq 0) { Write-Host "✓ SYNTAX VALID" -ForegroundColor Green } else { Write-Host "✗ SYNTAX ERROR" -ForegroundColor Red }
+
+Expected result: "✓ SYNTAX VALID"
+
+
+STEP 2: RUN THE FIXED SCRIPT
+================================================================================
+
+1. Open PowerShell as Administrator
+   (Right-click PowerShell → Run as Administrator)
+
+2. Navigate to backend:
+   cd C:\Users\Owner\Documents\weather-dashboard\backend
+
+3. Run the script:
+   powershell -ExecutionPolicy Bypass -File setup_scheduler.ps1
+
+Expected output:
+  ========================================================================
+           Weather Dashboard - Task Scheduler Setup
+  ========================================================================
+
+  Configuration:
+    Task Name:     WeatherDashboard-DailyRefresh
+    Schedule:      Daily at 02:00
+    Script:        C:\Users\Owner\Documents\weather-dashboard\backend\refresh_weather.py
+    Python Env:    C:\Users\Owner\Documents\weather-dashboard\backend\.venv\Scripts\activate.ps1
+
+  [OK] Scheduled task created successfully!
+
+  Next scheduled run: 2026-07-04 02:00:00
+
+  To view the task:
+    Get-ScheduledTask -TaskName 'WeatherDashboard-DailyRefresh' | Format-List
+
+  To run the task manually:
+    Start-ScheduledTask -TaskName 'WeatherDashboard-DailyRefresh'
+
+  To remove the task:
+    powershell -ExecutionPolicy Bypass -File setup_scheduler.ps1 -Remove
+
+
+STEP 3: VERIFY TASK WAS CREATED
+================================================================================
+
+Run in PowerShell:
+
+  Get-ScheduledTask -TaskName "WeatherDashboard-DailyRefresh" | Format-List
+
+Expected output shows:
+  State    : Ready
+  Triggers : {(Daily, triggers at 02:00)}
+
+
+STEP 4: TEST TASK MANUALLY (Optional)
+================================================================================
+
+Run in PowerShell as Administrator:
+
+  Start-ScheduledTask -TaskName "WeatherDashboard-DailyRefresh"
+  Start-Sleep -Seconds 3
+  Get-ScheduledTask -TaskName "WeatherDashboard-DailyRefresh" | Select LastRunTime, LastTaskResult
+
+Expected output:
+  LastRunTime   : 2026-07-03 14:32:45
+  LastTaskResult: 0  (0 = success, non-zero = error)
+
+
+STEP 5: VERIFY LOGS
+================================================================================
+
+Check the weather refresh log:
+
+  Get-Content "C:\Users\Owner\Documents\weather-dashboard\backend\weather_refresh.log" -Tail 20
+
+Expected: Recent entries showing refresh execution
+
+
+STEP 6: REMOVE TASK (If needed)
+================================================================================
+
+Run in PowerShell as Administrator:
+
+  powershell -ExecutionPolicy Bypass -File setup_scheduler.ps1 -Remove
+
+Expected output: "[OK] Task removed successfully"
+
+
+WHAT WAS FIXED
+================================================================================
+
+The original script had these parser errors:
+
+  ❌ "Unexpected token '}'"
+  ❌ "Missing closing '}'"
+  ❌ "Missing string terminator"
+  ❌ "ParserError"
+
+Root causes:
+  1. Unicode box drawing characters (╔ ║ ╚) in header - REMOVED
+  2. Unicode symbols (✓ ✗) in output - REMOVED
+  3. Nested quotes and backticks in -Argument - FIXED
+  4. Invalid Get-Date syntax - FIXED
+
+Fixed script:
+  ✓ Uses ASCII characters only (no Unicode)
+  ✓ Proper quote escaping
+  ✓ Correct PowerShell syntax
+  ✓ Fully compatible with PowerShell 5.1
+  ✓ Creates Windows scheduled task successfully
+
+
+QUICK TEST COMMAND
+================================================================================
+
+One-liner to verify both syntax AND execution:
+
+  & powershell -ExecutionPolicy Bypass -File "C:\Users\Owner\Documents\weather-dashboard\backend\setup_scheduler.ps1" 2>&1 | head -10
+
+
+TROUBLESHOOTING
+================================================================================
+
+If you get "must be run as Administrator":
+  - Right-click PowerShell
+  - Select "Run as Administrator"
+  - Try again
+
+If you get "files not found":
+  - Verify backend/.venv exists (Python virtual environment)
+  - Verify backend/refresh_weather.py exists
+  - Check file paths are correct
+
+If task creation fails:
+  - Check Windows Task Scheduler is accessible
+  - Verify you have admin rights
+  - Check weather_refresh.log for details
+
+
+================================================================================

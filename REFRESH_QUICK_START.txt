@@ -1,0 +1,208 @@
+================================================================================
+DAILY WEATHER REFRESH - QUICK START GUIDE
+================================================================================
+
+OPTION 1: RUN ONCE (Manual Refresh)
+================================================================================
+
+1. Open PowerShell
+2. Navigate to backend:
+   cd C:\Users\Owner\Documents\weather-dashboard\backend
+
+3. Activate virtual environment:
+   .\.venv\Scripts\Activate.ps1
+
+4. Run refresh:
+   python refresh_weather.py
+
+Expected output:
+  ✓ Lists each location being refreshed
+  ✓ Shows "N new records inserted" per location
+  ✓ Shows final summary (succeeded/failed count)
+
+Logs saved to: weather_refresh.log
+
+
+OPTION 2: AUTOMATIC DAILY REFRESH (Windows Task Scheduler)
+================================================================================
+
+1. Open PowerShell as Administrator
+   (Right-click PowerShell → "Run as Administrator")
+
+2. Navigate to backend:
+   cd C:\Users\Owner\Documents\weather-dashboard\backend
+
+3. Run setup script:
+   powershell -ExecutionPolicy Bypass -File setup_scheduler.ps1
+
+Expected output:
+  ✓ Task created successfully
+  ✓ Shows next scheduled run time (daily at 2 AM)
+  ✓ Shows command to verify task
+
+That's it! Refresh will run automatically every day at 2 AM.
+
+
+OPTION 3: CONTINUOUS REFRESH (24-hour intervals - for testing)
+================================================================================
+
+1. Open PowerShell
+2. Navigate to backend:
+   cd C:\Users\Owner\Documents\weather-dashboard\backend
+
+3. Activate virtual environment:
+   .\.venv\Scripts\Activate.ps1
+
+4. Run continuous mode:
+   python refresh_weather.py --continuous
+
+This runs refresh every 24 hours. Logs to console and weather_refresh.log.
+Stop with: Ctrl+C
+
+
+VERIFY SCHEDULED TASK
+================================================================================
+
+View task details:
+  Get-ScheduledTask -TaskName "WeatherDashboard-DailyRefresh" | Format-List
+
+Check last execution time:
+  Get-ScheduledTask -TaskName "WeatherDashboard-DailyRefresh" | Select-Object LastRunTime, LastTaskResult
+
+Run manually now:
+  Start-ScheduledTask -TaskName "WeatherDashboard-DailyRefresh"
+
+
+REMOVE SCHEDULED TASK
+================================================================================
+
+As Administrator:
+  powershell -ExecutionPolicy Bypass -File setup_scheduler.ps1 -Remove
+
+Or manually via Task Scheduler:
+  Win+R → taskschd.msc → Find "WeatherDashboard-DailyRefresh" → Right-click → Delete
+
+
+VIEW LOGS
+================================================================================
+
+View log file:
+  C:\Users\Owner\Documents\weather-dashboard\backend\weather_refresh.log
+
+Last 50 lines:
+  Get-Content "C:\Users\Owner\Documents\weather-dashboard\backend\weather_refresh.log" -Tail 50
+
+Real-time monitoring (requires PowerShell):
+  Get-Content "weather_refresh.log" -Wait -Tail 10
+
+
+CUSTOMIZE SCHEDULE TIME
+================================================================================
+
+Default: 2 AM daily
+
+To change time:
+  1. Edit backend\setup_scheduler.ps1 line 18
+  2. Change $Time = "02:00" to desired time (e.g., "14:00" for 2 PM)
+  3. Run setup script again as Administrator
+
+Common times:
+  "00:00" - Midnight
+  "06:00" - 6 AM
+  "14:00" - 2 PM
+  "23:00" - 11 PM
+
+
+WHAT GETS REFRESHED
+================================================================================
+
+✓ All saved locations in database
+✓ Only missing daily records (no duplicates)
+✓ Historical weather: temperature, precipitation, wind speed
+
+Example:
+  Location: Tokyo
+  Records: ~365 per year (one per day)
+  Size: ~1KB per location per year
+
+
+TROUBLESHOOTING
+================================================================================
+
+Problem: "Python not found"
+  Solution: Ensure .venv\Scripts\Activate.ps1 was run
+
+Problem: Task won't trigger
+  Solution:
+    - Verify: Get-ScheduledTask -TaskName "WeatherDashboard-DailyRefresh"
+    - Check logs: weather_refresh.log
+    - Run manually: Start-ScheduledTask -TaskName "WeatherDashboard-DailyRefresh"
+
+Problem: No records being inserted
+  Solution:
+    - Check MySQL is running: Get-Service MySQL80 | Select-Object Status
+    - Verify locations exist in database
+    - Check logs for API errors
+
+Problem: Permission denied
+  Solution: Run PowerShell as Administrator (Right-click → Run as Administrator)
+
+
+FILES CREATED
+================================================================================
+
+backend/app/scheduler.py          - Core refresh logic
+backend/refresh_weather.py        - Script entry point (can be scheduled)
+backend/setup_scheduler.ps1       - Windows Task Scheduler setup
+
+Logs:
+backend/weather_refresh.log       - Refresh execution log
+
+
+FEATURES
+================================================================================
+
+✓ Refreshes all locations automatically
+✓ Downloads only missing records (prevents duplicates)
+✓ Continues if one location fails
+✓ Detailed logging of all operations
+✓ Can run manually or scheduled
+✓ Reuses existing database functions
+✓ No frontend changes
+✓ No new dependencies
+
+
+QUICK COMMANDS
+================================================================================
+
+One-time refresh:
+  python refresh_weather.py
+
+Continuous (24-hour loop):
+  python refresh_weather.py --continuous
+
+Setup auto-schedule (as Admin):
+  powershell -ExecutionPolicy Bypass -File setup_scheduler.ps1
+
+Remove auto-schedule (as Admin):
+  powershell -ExecutionPolicy Bypass -File setup_scheduler.ps1 -Remove
+
+View logs:
+  Get-Content weather_refresh.log -Tail 50
+
+Check database records:
+  SELECT COUNT(*) FROM weather_history;
+
+================================================================================
+NEED HELP?
+================================================================================
+
+See detailed docs: DAILY_REFRESH_IMPLEMENTATION.md
+
+For issues:
+  1. Check weather_refresh.log for error messages
+  2. Verify MySQL service is running
+  3. Verify locations exist in database
+  4. Try running manually: python refresh_weather.py
+
+================================================================================
