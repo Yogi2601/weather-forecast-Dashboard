@@ -119,7 +119,7 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
   }
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative z-20" ref={dropdownRef}>
       <button
         onClick={() => {
           setIsOpen(!isOpen)
@@ -141,7 +141,7 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden"
+            className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-[100] overflow-hidden"
             style={{ maxHeight: '300px' }}
           >
             {isSearchable && (
@@ -595,9 +595,9 @@ export default function WeatherFilters({ onSelectCity }) {
   return (
     <div className="space-y-6 pb-12">
       {/* Location Filters */}
-      <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md">
+      <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md relative z-0">
         <h2 className="text-lg font-bold text-white mb-6">Location</h2>
-        <div className="space-y-4">
+        <div className="space-y-4 relative">
           <Dropdown
             label="Select Country"
             value={selectedCountry?.isoCode}
