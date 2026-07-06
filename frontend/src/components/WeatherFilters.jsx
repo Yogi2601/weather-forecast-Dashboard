@@ -271,12 +271,17 @@ function CityCard({ city, index, onSelect, weatherCode }) {
   )
 }
 
-function CityResultsModal({ cities, isOpen, onClose, onSelectCity, selectedCountry, selectedState, isLoading }) {
+function CityResultsModal({ cities, isOpen, onClose, onSelectCity, selectedCountry, selectedState, isLoading, onReset }) {
   if (!isOpen) return null
 
   const handleCitySelect = (city) => {
     onSelectCity?.(city)
     onClose()
+  }
+
+  const handleNewSearch = () => {
+    onClose()
+    onReset?.()
   }
 
   return (
@@ -300,8 +305,8 @@ function CityResultsModal({ cities, isOpen, onClose, onSelectCity, selectedCount
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="sticky top-0 bg-slate-900/95 border-b border-slate-800 px-8 py-6 flex items-center justify-between shrink-0">
-                <div>
+              <div className="sticky top-0 bg-slate-900/95 border-b border-slate-800 px-8 py-6 flex items-center justify-between shrink-0 gap-4">
+                <div className="flex-1">
                   <h2 className="text-3xl font-bold text-white">
                     {isLoading ? (
                       <span className="flex items-center gap-2">
@@ -316,9 +321,17 @@ function CityResultsModal({ cities, isOpen, onClose, onSelectCity, selectedCount
                     <p className="text-sm text-slate-400 mt-2">{selectedState.name}, {selectedCountry.name}</p>
                   )}
                 </div>
+                {!isLoading && cities.length > 0 && (
+                  <button
+                    onClick={handleNewSearch}
+                    className="px-4 py-2 rounded-lg bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white text-sm font-medium transition-colors shrink-0 whitespace-nowrap"
+                  >
+                    New Search
+                  </button>
+                )}
                 <button
                   onClick={onClose}
-                  className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors shrink-0 ml-4"
+                  className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors shrink-0"
                 >
                   <X className="w-7 h-7" />
                 </button>
@@ -495,6 +508,14 @@ export default function WeatherFilters({ onSelectCity }) {
     }
   }, [selectedCountry, selectedState, selectedWeather, fetchWeatherFromOpenMeteo])
 
+  const resetFilters = useCallback(() => {
+    setSelectedCountry(null)
+    setSelectedState(null)
+    setSelectedWeather(null)
+    setSearchResults([])
+    setShowResults(false)
+  }, [])
+
   const handleSelectCity = useCallback((cityData) => {
     setShowResults(false)
 
@@ -507,13 +528,9 @@ export default function WeatherFilters({ onSelectCity }) {
     }
 
     // Reset filters after selection
-    setSelectedCountry(null)
-    setSelectedState(null)
-    setSelectedWeather(null)
-    setSearchResults([])
-
+    resetFilters()
     onSelectCity?.(cityObject)
-  }, [onSelectCity, selectedCountry, selectedState])
+  }, [onSelectCity, selectedCountry, selectedState, resetFilters])
 
   return (
     <div className="space-y-6 pb-12">
@@ -605,6 +622,7 @@ export default function WeatherFilters({ onSelectCity }) {
         isOpen={showResults}
         onClose={() => setShowResults(false)}
         onSelectCity={handleSelectCity}
+        onReset={resetFilters}
         selectedCountry={selectedCountry}
         selectedState={selectedState}
         isLoading={isSearching}
