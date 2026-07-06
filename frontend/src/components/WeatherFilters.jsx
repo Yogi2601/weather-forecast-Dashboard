@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, Loader2, Wind, Droplets, Eye, Zap } from 'lucide-react'
+import { ChevronDown, Loader2, Wind, X } from 'lucide-react'
 import {
   getAllCountries,
   getStatesByCountry,
   getCitiesByState,
 } from '../services/LocationService'
-import { fetchWeatherByCoordinates } from '../services/weatherService'
 
 const WEATHER_CONDITIONS = [
   { id: 'sunny', label: 'Sunny', emoji: '☀️', codes: [0, 1] },
@@ -36,6 +35,20 @@ const VISIBILITY_LEVELS = [
 function Dropdown({ label, value, onChange, options, isLoading, isSearchable = false }) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchInput, setSearchInput] = useState('')
+  const dropdownRef = useRef(null)
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false)
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
 
   const filteredOptions = useMemo(() => {
     if (!searchInput.trim()) return options
@@ -50,7 +63,7 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
   }, [value, options, label])
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-800/40 border border-slate-700/60 text-slate-200 hover:border-slate-600 transition-colors"
@@ -68,7 +81,7 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-700 rounded-xl shadow-lg z-50 overflow-hidden"
+            className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden"
           >
             {isSearchable && (
               <input
@@ -76,6 +89,7 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
                 placeholder="Search..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
+                autoFocus
                 className="w-full px-4 py-2 bg-slate-900/50 border-b border-slate-700 text-sm text-slate-200 placeholder-slate-500 outline-none"
               />
             )}
@@ -110,25 +124,6 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
-  )
-}
-
-function Slider({ label, value, onChange, min = 0, max = 100, unit = '' }) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-slate-300">{label}</label>
-        <span className="text-sm font-bold text-blue-400">{value}{unit}</span>
-      </div>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-      />
     </div>
   )
 }
@@ -185,7 +180,6 @@ function WeatherConditionCard({ condition, isSelected, onClick }) {
     >
       {isSelected && (
         <motion.div
-          layoutId="activeCondition"
           className="absolute inset-0 border-2 border-blue-500 rounded-xl pointer-events-none"
           initial={false}
           transition={{ duration: 0.2 }}
@@ -377,9 +371,9 @@ export default function WeatherFilters({ onSelectCity }) {
   return (
     <div className="space-y-6 pb-12">
       {/* Section 1: Location Filters */}
-      <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md overflow-visible">
+      <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md">
         <h2 className="text-lg font-bold text-white mb-6">Location</h2>
-        <div className="space-y-6">
+        <div className="space-y-4">
           <Dropdown
             label="Select Country"
             value={selectedCountry?.isoCode}
@@ -399,150 +393,155 @@ export default function WeatherFilters({ onSelectCity }) {
               isSearchable={true}
             />
           )}
-
-          {selectedCountry && selectedState && (
-            <Dropdown
-              label="Select City (Optional)"
-              value={null}
-              onChange={() => {}}
-              options={cities}
-              isLoading={isLoadingCities}
-              isSearchable={true}
-            />
-          )}
         </div>
       </div>
 
-      {/* Section 2: Weather Condition Filters */}
-      <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md">
-        <h2 className="text-lg font-bold text-white mb-6">Weather Condition</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-          {WEATHER_CONDITIONS.map(condition => (
-            <WeatherConditionCard
-              key={condition.id}
-              condition={condition}
-              isSelected={selectedWeather === condition.id}
-              onClick={() => setSelectedWeather(selectedWeather === condition.id ? null : condition.id)}
+      {/* Section 2: Weather Condition Filters - Only show after country+state selected */}
+      {selectedCountry && selectedState && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold text-white">Weather Condition</h2>
+            {selectedWeather && (
+              <button
+                onClick={() => setSelectedWeather(null)}
+                className="text-xs px-2 py-1 rounded bg-slate-700 text-slate-300 hover:bg-slate-600 flex items-center gap-1"
+              >
+                <X className="w-3 h-3" /> Clear
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            {WEATHER_CONDITIONS.map(condition => (
+              <WeatherConditionCard
+                key={condition.id}
+                condition={condition}
+                isSelected={selectedWeather === condition.id}
+                onClick={() => setSelectedWeather(selectedWeather === condition.id ? null : condition.id)}
+              />
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Section 3: Extra Weather Filters - Only show after country+state selected */}
+      {selectedCountry && selectedState && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md"
+        >
+          <h2 className="text-lg font-bold text-white mb-6">Additional Filters</h2>
+          <div className="space-y-6">
+            <RangeSlider
+              label="Temperature Range"
+              minValue={tempMin}
+              maxValue={tempMax}
+              onMinChange={setTempMin}
+              onMaxChange={setTempMax}
+              min={-30}
+              max={50}
+              unit="°C"
             />
-          ))}
-        </div>
-      </div>
+            <RangeSlider
+              label="Humidity Range"
+              minValue={humidityMin}
+              maxValue={humidityMax}
+              onMinChange={setHumidityMin}
+              onMaxChange={setHumidityMax}
+              min={0}
+              max={100}
+              unit="%"
+            />
+            <RangeSlider
+              label="Wind Speed Range"
+              minValue={windSpeedMin}
+              maxValue={windSpeedMax}
+              onMinChange={setWindSpeedMin}
+              onMaxChange={setWindSpeedMax}
+              min={0}
+              max={50}
+              unit=" km/h"
+            />
+            <RangeSlider
+              label="UV Index Range"
+              minValue={uvIndexMin}
+              maxValue={uvIndexMax}
+              onMinChange={setUvIndexMin}
+              onMaxChange={setUvIndexMax}
+              min={0}
+              max={11}
+            />
 
-      {/* Section 3: Extra Weather Filters */}
-      <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md">
-        <h2 className="text-lg font-bold text-white mb-6">Additional Filters</h2>
-        <div className="space-y-6">
-          <RangeSlider
-            label="Temperature Range"
-            minValue={tempMin}
-            maxValue={tempMax}
-            onMinChange={setTempMin}
-            onMaxChange={setTempMax}
-            min={-30}
-            max={50}
-            unit="°C"
-          />
-          <RangeSlider
-            label="Humidity Range"
-            minValue={humidityMin}
-            maxValue={humidityMax}
-            onMinChange={setHumidityMin}
-            onMaxChange={setHumidityMax}
-            min={0}
-            max={100}
-            unit="%"
-          />
-          <RangeSlider
-            label="Wind Speed Range"
-            minValue={windSpeedMin}
-            maxValue={windSpeedMax}
-            onMinChange={setWindSpeedMin}
-            onMaxChange={setWindSpeedMax}
-            min={0}
-            max={50}
-            unit=" km/h"
-          />
-          <RangeSlider
-            label="UV Index Range"
-            minValue={uvIndexMin}
-            maxValue={uvIndexMax}
-            onMinChange={setUvIndexMin}
-            onMaxChange={setUvIndexMax}
-            min={0}
-            max={11}
-          />
-          <Slider
-            label="Rain Probability"
-            value={rainProbability}
-            onChange={setRainProbability}
-            min={0}
-            max={100}
-            unit="%"
-          />
+            <div className="pt-4 border-t border-slate-700">
+              <label className="text-sm font-medium text-slate-300 mb-3 block">Air Quality</label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {AIR_QUALITY_LEVELS.map(level => (
+                  <button
+                    key={level.id}
+                    onClick={() => setSelectedAirQuality(selectedAirQuality === level.id ? null : level.id)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      selectedAirQuality === level.id
+                        ? `${level.color} border-2`
+                        : 'bg-slate-800/40 border border-slate-700 text-slate-300 hover:border-slate-600'
+                    }`}
+                  >
+                    {level.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          <div className="pt-4 border-t border-slate-700">
-            <label className="text-sm font-medium text-slate-300 mb-3 block">Air Quality</label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {AIR_QUALITY_LEVELS.map(level => (
-                <button
-                  key={level.id}
-                  onClick={() => setSelectedAirQuality(selectedAirQuality === level.id ? null : level.id)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    selectedAirQuality === level.id
-                      ? `${level.color} border-2`
-                      : 'bg-slate-800/40 border border-slate-700 text-slate-300 hover:border-slate-600'
-                  }`}
-                >
-                  {level.label}
-                </button>
-              ))}
+            <div className="pt-4 border-t border-slate-700">
+              <label className="text-sm font-medium text-slate-300 mb-3 block">Visibility</label>
+              <div className="grid grid-cols-3 gap-2">
+                {VISIBILITY_LEVELS.map(level => (
+                  <button
+                    key={level.id}
+                    onClick={() => setSelectedVisibility(selectedVisibility === level.id ? null : level.id)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      selectedVisibility === level.id
+                        ? 'bg-blue-600/20 border-2 border-blue-500 text-blue-300'
+                        : 'bg-slate-800/40 border border-slate-700 text-slate-300 hover:border-slate-600'
+                    }`}
+                  >
+                    {level.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-
-          <div className="pt-4 border-t border-slate-700">
-            <label className="text-sm font-medium text-slate-300 mb-3 block">Visibility</label>
-            <div className="grid grid-cols-3 gap-2">
-              {VISIBILITY_LEVELS.map(level => (
-                <button
-                  key={level.id}
-                  onClick={() => setSelectedVisibility(selectedVisibility === level.id ? null : level.id)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    selectedVisibility === level.id
-                      ? 'bg-blue-600/20 border-2 border-blue-500 text-blue-300'
-                      : 'bg-slate-800/40 border border-slate-700 text-slate-300 hover:border-slate-600'
-                  }`}
-                >
-                  {level.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+        </motion.div>
+      )}
 
       {/* Section 4: Find Cities Button */}
-      <div className="flex gap-3">
-        <button
-          onClick={handleFindCities}
-          disabled={!selectedCountry || !selectedState || isSearching}
-          className={`flex-1 py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all duration-200 ${
-            isSearching
-              ? 'bg-blue-600/30 text-blue-300 cursor-not-allowed'
-              : selectedCountry && selectedState
-                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:shadow-lg hover:shadow-blue-500/20 active:scale-95'
-                : 'bg-slate-800/40 text-slate-500 cursor-not-allowed'
-          }`}
-        >
-          {isSearching ? (
-            <span className="flex items-center justify-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Searching...
-            </span>
-          ) : (
-            'Find Cities'
-          )}
-        </button>
-      </div>
+      {selectedCountry && selectedState && (
+        <div className="flex gap-3">
+          <button
+            onClick={handleFindCities}
+            disabled={isSearching}
+            className={`flex-1 py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all duration-200 ${
+              isSearching
+                ? 'bg-blue-600/30 text-blue-300 cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:shadow-lg hover:shadow-blue-500/20 active:scale-95'
+            }`}
+          >
+            {isSearching ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Searching...
+              </span>
+            ) : (
+              'Find Cities'
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Search Results */}
       {searchResults.length > 0 && (
