@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Menu, Bell, MapPin, Loader2, MapPinned, Star, History, AlertCircle, CheckCircle2, Settings } from 'lucide-react'
 import { searchLocations } from '../services/weatherService'
-import HierarchicalSearch from './HierarchicalSearch'
 
 const DEBOUNCE_MS = 300
 
@@ -26,7 +25,6 @@ export default function Navbar({
   const [isLoading, setIsLoading] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const [hasSearched, setHasSearched] = useState(false)
-  const [showHierarchicalSearch, setShowHierarchicalSearch] = useState(false)
 
   const containerRef = useRef(null)
   const searchInputRef = useRef(null)
@@ -37,14 +35,12 @@ export default function Navbar({
     function handleClickOutside(e) {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setIsOpen(false)
-        setShowHierarchicalSearch(false)
       }
     }
 
     function handleEscapeKey(e) {
       if (e.key === 'Escape') {
         setIsOpen(false)
-        setShowHierarchicalSearch(false)
       }
     }
 
@@ -160,7 +156,7 @@ export default function Navbar({
 
   const isSearching = searchTerm.trim().length >= 2
   const showAutocomplete = isOpen && isSearching
-  const showHistoryPanel = isOpen && !isSearching && (favorites.length > 0 || recentSearches.length > 0)
+  const showHistoryPanel = isOpen && !isSearching && (favorites.length > 0 || recentSearches.length > 0) && !searchTerm.trim()
 
   return (
     <header className="flex items-center justify-between h-20 px-6 border-b border-slate-800 bg-slate-950/20 backdrop-blur-md sticky top-0 z-30">
@@ -191,31 +187,21 @@ export default function Navbar({
               onChange={(e) => {
                 setSearchTerm(e.target.value)
                 setIsOpen(true)
-                if (e.target.value.trim()) {
-                  setShowHierarchicalSearch(false)
-                }
               }}
               onFocus={() => {
-                if (!searchTerm.trim()) {
-                  setShowHierarchicalSearch(true)
-                  setIsOpen(false)
-                } else {
+                if (searchTerm.trim()) {
                   setIsOpen(true)
-                  setShowHierarchicalSearch(false)
                 }
               }}
               onKeyDown={(e) => {
                 if (searchTerm.trim()) {
                   handleKeyDown(e)
-                } else if (e.key === 'ArrowRight') {
-                  // Allow arrow navigation in hierarchical dropdown
                 } else if (e.key === 'Escape') {
-                  setShowHierarchicalSearch(false)
                   setIsOpen(false)
                 }
               }}
               role="combobox"
-              aria-expanded={showAutocomplete || showHistoryPanel || showHierarchicalSearch}
+              aria-expanded={showAutocomplete || showHistoryPanel}
               aria-autocomplete="list"
               className="w-full pl-10 pr-9 py-2.5 text-sm bg-slate-900/60 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/25 transition-all duration-200"
             />
@@ -223,13 +209,6 @@ export default function Navbar({
               <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 animate-spin" />
             )}
           </form>
-
-          {/* Hierarchical Search Menu */}
-          <HierarchicalSearch
-            isOpen={showHierarchicalSearch && !searchTerm.trim()}
-            onClose={() => setShowHierarchicalSearch(false)}
-            onSelectLocation={selectLocation}
-          />
 
           {/* Autocomplete Dropdown */}
           <AnimatePresence>
