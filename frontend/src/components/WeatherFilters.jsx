@@ -182,6 +182,95 @@ function WeatherConditionCard({ condition, isSelected, onClick }) {
   )
 }
 
+function CityCard({ city, index, onSelect, weatherCode }) {
+  // Get weather-specific animations based on weather code
+  const getWeatherAnimation = () => {
+    if ([95, 96, 99].includes(weatherCode)) {
+      // Thunderstorm - shake effect
+      return {
+        animate: { y: [0, -2, 0] },
+        transition: { repeat: Infinity, duration: 0.8, ease: 'easeInOut' }
+      }
+    } else if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(weatherCode)) {
+      // Rain - gentle float
+      return {
+        animate: { y: [0, -4, 0] },
+        transition: { repeat: Infinity, duration: 2, ease: 'easeInOut' }
+      }
+    } else if ([71, 73, 75, 77, 85, 86].includes(weatherCode)) {
+      // Snow - slow float
+      return {
+        animate: { y: [0, -3, 0] },
+        transition: { repeat: Infinity, duration: 3, ease: 'easeInOut' }
+      }
+    }
+    // Default sunny - subtle bounce
+    return {
+      animate: { y: [0, -2, 0] },
+      transition: { repeat: Infinity, duration: 2.5, ease: 'easeInOut' }
+    }
+  }
+
+  const weatherAnim = getWeatherAnimation()
+
+  return (
+    <motion.div
+      key={`${city.name}-${city.latitude}-${city.longitude}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      className="group cursor-pointer h-full"
+      onClick={() => onSelect(city)}
+    >
+      <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-800/50 to-slate-900/50 p-6 backdrop-blur-md hover:border-blue-500/30 hover:from-slate-800/70 hover:to-slate-900/70 transition-all h-full flex flex-col shadow-lg hover:shadow-blue-500/10">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-white">{city.name}</h3>
+            <p className="text-xs text-slate-400 mt-1">{city.condition}</p>
+          </div>
+          <motion.div
+            className="text-4xl shrink-0 ml-2"
+            initial={{ scale: 1 }}
+            {...weatherAnim}
+          >
+            {city.icon || '🌡️'}
+          </motion.div>
+        </div>
+
+        {/* Temperature Display */}
+        <div className="bg-slate-900/40 rounded-xl p-4 mb-4">
+          <div className="text-3xl font-bold text-white">{Math.round(city.temp)}°C</div>
+        </div>
+
+        {/* Details Grid */}
+        <div className="space-y-3 flex-1">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-400">Humidity</span>
+            <span className="font-semibold text-slate-200">{city.humidity}%</span>
+          </div>
+          <div className="h-px bg-slate-800/50" />
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-slate-400">Wind</span>
+            <span className="font-semibold text-slate-200">{Math.round(city.wind_speed)} km/h</span>
+          </div>
+        </div>
+
+        {/* Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onSelect(city)
+          }}
+          className="w-full mt-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:shadow-lg hover:shadow-blue-500/30 transition-all active:scale-95 group-hover:from-blue-500 group-hover:to-blue-400"
+        >
+          View Details
+        </button>
+      </div>
+    </motion.div>
+  )
+}
+
 function CityResultsModal({ cities, isOpen, onClose, onSelectCity, selectedCountry, selectedState, isLoading }) {
   if (!isOpen) return null
 
@@ -199,99 +288,72 @@ function CityResultsModal({ cities, isOpen, onClose, onSelectCity, selectedCount
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-40"
           />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900/95 border border-slate-800 rounded-3xl w-[90vw] max-w-4xl max-h-[80vh] overflow-hidden backdrop-blur-md z-50 flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="sticky top-0 bg-slate-900/95 border-b border-slate-800 px-6 py-4 flex items-center justify-between shrink-0">
-              <div>
-                <h2 className="text-2xl font-bold text-white">
-                  {isLoading ? 'Loading Cities...' : `${cities.length} Cities Found`}
-                </h2>
-                {selectedState && selectedCountry && (
-                  <p className="text-sm text-slate-400 mt-1">{selectedState.name}, {selectedCountry.name}</p>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+              className="bg-slate-900/98 border border-slate-800 rounded-3xl w-full max-w-5xl max-h-[85vh] overflow-hidden backdrop-blur-xl flex flex-col shadow-2xl pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="sticky top-0 bg-slate-900/95 border-b border-slate-800 px-8 py-6 flex items-center justify-between shrink-0">
+                <div>
+                  <h2 className="text-3xl font-bold text-white">
+                    {isLoading ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
+                        Loading Cities...
+                      </span>
+                    ) : (
+                      `${cities.length} Cities Found`
+                    )}
+                  </h2>
+                  {selectedState && selectedCountry && (
+                    <p className="text-sm text-slate-400 mt-2">{selectedState.name}, {selectedCountry.name}</p>
+                  )}
+                </div>
+                <button
+                  onClick={onClose}
+                  className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors shrink-0 ml-4"
+                >
+                  <X className="w-7 h-7" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="overflow-y-auto flex-1 px-8 py-8">
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-16">
+                    <div className="text-center">
+                      <Loader2 className="w-12 h-12 animate-spin text-blue-400 mx-auto mb-4" />
+                      <p className="text-slate-300">Fetching city weather data...</p>
+                    </div>
+                  </div>
+                ) : cities.length === 0 ? (
+                  <div className="text-center py-16">
+                    <p className="text-slate-400 text-lg mb-2">No cities found matching your criteria.</p>
+                    <p className="text-slate-500 text-sm">Try selecting a different weather condition.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {cities.map((city, index) => (
+                      <CityCard
+                        key={`${city.name}-${city.latitude}-${city.longitude}-${index}`}
+                        city={city}
+                        index={index}
+                        onSelect={handleCitySelect}
+                        weatherCode={city.weather_code}
+                      />
+                    ))}
+                  </div>
                 )}
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors shrink-0"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="overflow-y-auto flex-1 p-6">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
-                </div>
-              ) : cities.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-slate-400 text-lg">No cities found matching your criteria.</p>
-                  <p className="text-slate-500 text-sm mt-2">Try adjusting your weather filters.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {cities.map((city, index) => (
-                    <motion.div
-                      key={`${city.name}-${city.latitude}-${city.longitude}`}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.2, delay: index * 0.03 }}
-                      onClick={() => handleCitySelect(city)}
-                      className="rounded-xl border border-slate-800 bg-slate-800/40 p-4 backdrop-blur-md hover:border-slate-700 hover:bg-slate-800/60 transition-all group cursor-pointer"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h3 className="text-base font-bold text-white">{city.name}</h3>
-                        </div>
-                        <motion.span className="text-2xl group-hover:scale-110 transition-transform">
-                          {city.icon || '🌡️'}
-                        </motion.span>
-                      </div>
-
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-400">Temperature</span>
-                          <span className="font-semibold text-white">{Math.round(city.temp)}°C</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-400">Condition</span>
-                          <span className="text-blue-400 font-semibold text-xs">{city.condition}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-400">Humidity</span>
-                          <span className="text-slate-300">{city.humidity}%</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-400">Wind</span>
-                          <span className="text-slate-300">{Math.round(city.wind_speed)} km/h</span>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleCitySelect(city)
-                        }}
-                        className="w-full mt-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg font-semibold text-xs uppercase tracking-wider hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-95"
-                      >
-                        View Details
-                      </button>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
