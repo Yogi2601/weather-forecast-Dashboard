@@ -8,6 +8,7 @@ const DEBOUNCE_MS = 300
 export default function Navbar({
   setSidebarOpen,
   onSearch,
+  onNavigateToFilters,
   onUseCurrentLocation,
   recentSearches = [],
   favorites = [],
@@ -234,34 +235,50 @@ export default function Navbar({
                 )}
 
                 {suggestions.length > 0 && (
-                  <ul className="max-h-72 overflow-y-auto custom-scrollbar py-1">
-                    {suggestions.map((location, i) => (
-                      <li key={location.id ?? `${location.name}-${i}`}>
-                        <button
-                          type="button"
-                          onMouseEnter={() => setActiveIndex(i)}
-                          onClick={() => selectLocation(location)}
-                          className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm transition-colors ${
-                            i === activeIndex
-                              ? 'bg-blue-500/15 text-white'
-                              : 'text-slate-300 hover:bg-slate-800/60'
-                          }`}
-                        >
-                          <MapPinned className={`h-4 w-4 flex-shrink-0 ${i === activeIndex ? 'text-blue-400' : 'text-slate-500'}`} />
-                          <span className="min-w-0 flex-1">
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <span className="font-semibold text-white">{location.name}</span>
-                                <span className="ml-1.5 text-xs text-slate-400">
-                                  {[location.region, location.country].filter(Boolean).join(', ')}
-                                </span>
+                  <>
+                    <ul className="max-h-72 overflow-y-auto custom-scrollbar py-1">
+                      {suggestions.map((location, i) => (
+                        <li key={location.id ?? `${location.name}-${i}`}>
+                          <button
+                            type="button"
+                            onMouseEnter={() => setActiveIndex(i)}
+                            onClick={() => selectLocation(location)}
+                            className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm transition-colors ${
+                              i === activeIndex
+                                ? 'bg-blue-500/15 text-white'
+                                : 'text-slate-300 hover:bg-slate-800/60'
+                            }`}
+                          >
+                            <MapPinned className={`h-4 w-4 flex-shrink-0 ${i === activeIndex ? 'text-blue-400' : 'text-slate-500'}`} />
+                            <span className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <span className="font-semibold text-white">{location.name}</span>
+                                  <span className="ml-1.5 text-xs text-slate-400">
+                                    {[location.region, location.country].filter(Boolean).join(', ')}
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="border-t border-slate-800/50 px-3 py-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearchTerm('')
+                          setIsOpen(false)
+                          onNavigateToFilters?.()
+                        }}
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-blue-600/15 hover:bg-blue-600/25 text-blue-400 text-sm font-medium transition-colors"
+                      >
+                        <MapPin className="w-4 h-4" />
+                        Use Weather Filters for Advanced Search
+                      </button>
+                    </div>
+                  </>
                 )}
               </motion.div>
             )}

@@ -210,6 +210,7 @@ export default function App() {
         <Navbar
           setSidebarOpen={setSidebarOpen}
           onSearch={handleSearch}
+          onNavigateToFilters={() => setActiveTab('filters')}
           recentSearches={recentSearches}
           favorites={favorites}
           isFavorite={isFavorite}
