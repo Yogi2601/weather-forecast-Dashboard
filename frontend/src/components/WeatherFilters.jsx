@@ -133,6 +133,44 @@ function Slider({ label, value, onChange, min = 0, max = 100, unit = '' }) {
   )
 }
 
+function RangeSlider({ label, minValue, maxValue, onMinChange, onMaxChange, min = 0, max = 100, unit = '' }) {
+  return (
+    <div className="space-y-3">
+      <label className="text-sm font-medium text-slate-300">{label}</label>
+      <div className="flex gap-4 items-end">
+        <div className="flex-1">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-slate-500">Min</span>
+            <span className="text-sm font-bold text-blue-400">{minValue}{unit}</span>
+          </div>
+          <input
+            type="range"
+            min={min}
+            max={max}
+            value={minValue}
+            onChange={(e) => onMinChange(parseFloat(e.target.value))}
+            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+          />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-slate-500">Max</span>
+            <span className="text-sm font-bold text-blue-400">{maxValue}{unit}</span>
+          </div>
+          <input
+            type="range"
+            min={min}
+            max={max}
+            value={maxValue}
+            onChange={(e) => onMaxChange(parseFloat(e.target.value))}
+            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function WeatherConditionCard({ condition, isSelected, onClick }) {
   return (
     <motion.button
@@ -188,10 +226,14 @@ export default function WeatherFilters({ onSelectCity }) {
   const [states, setStates] = useState([])
   const [cities, setCities] = useState([])
 
-  const [tempRange, setTempRange] = useState([15, 30])
-  const [humidityRange, setHumidityRange] = useState([40, 80])
-  const [windSpeedRange, setWindSpeedRange] = useState([0, 30])
-  const [uvIndexRange, setUvIndexRange] = useState([0, 11])
+  const [tempMin, setTempMin] = useState(-30)
+  const [tempMax, setTempMax] = useState(50)
+  const [humidityMin, setHumidityMin] = useState(0)
+  const [humidityMax, setHumidityMax] = useState(100)
+  const [windSpeedMin, setWindSpeedMin] = useState(0)
+  const [windSpeedMax, setWindSpeedMax] = useState(50)
+  const [uvIndexMin, setUvIndexMin] = useState(0)
+  const [uvIndexMax, setUvIndexMax] = useState(11)
   const [rainProbability, setRainProbability] = useState(50)
 
   const [isLoadingCountries, setIsLoadingCountries] = useState(false)
@@ -315,10 +357,10 @@ export default function WeatherFilters({ onSelectCity }) {
       if (!weatherCodes.includes(weather.weather_code)) return false
     }
 
-    if (weather.temp < tempRange[0] || weather.temp > tempRange[1]) return false
-    if (weather.humidity < humidityRange[0] || weather.humidity > humidityRange[1]) return false
-    if (weather.wind_speed < windSpeedRange[0] || weather.wind_speed > windSpeedRange[1]) return false
-    if (weather.uv_index < uvIndexRange[0] || weather.uv_index > uvIndexRange[1]) return false
+    if (weather.temp < tempMin || weather.temp > tempMax) return false
+    if (weather.humidity < humidityMin || weather.humidity > humidityMax) return false
+    if (weather.wind_speed < windSpeedMin || weather.wind_speed > windSpeedMax) return false
+    if (weather.uv_index < uvIndexMin || weather.uv_index > uvIndexMax) return false
     if (weather.rain_probability && weather.rain_probability < rainProbability) return false
 
     if (selectedAirQuality && weather.aqi !== selectedAirQuality) return false
@@ -330,7 +372,7 @@ export default function WeatherFilters({ onSelectCity }) {
     }
 
     return true
-  }, [selectedWeather, tempRange, humidityRange, windSpeedRange, uvIndexRange, rainProbability, selectedAirQuality, selectedVisibility])
+  }, [selectedWeather, tempMin, tempMax, humidityMin, humidityMax, windSpeedMin, windSpeedMax, uvIndexMin, uvIndexMax, rainProbability, selectedAirQuality, selectedVisibility])
 
   return (
     <div className="space-y-6 pb-12">
@@ -390,34 +432,42 @@ export default function WeatherFilters({ onSelectCity }) {
       <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md">
         <h2 className="text-lg font-bold text-white mb-6">Additional Filters</h2>
         <div className="space-y-6">
-          <Slider
+          <RangeSlider
             label="Temperature Range"
-            value={tempRange[0]}
-            onChange={(v) => setTempRange([v, tempRange[1]])}
+            minValue={tempMin}
+            maxValue={tempMax}
+            onMinChange={setTempMin}
+            onMaxChange={setTempMax}
             min={-30}
             max={50}
             unit="°C"
           />
-          <Slider
+          <RangeSlider
             label="Humidity Range"
-            value={humidityRange[0]}
-            onChange={(v) => setHumidityRange([v, humidityRange[1]])}
+            minValue={humidityMin}
+            maxValue={humidityMax}
+            onMinChange={setHumidityMin}
+            onMaxChange={setHumidityMax}
             min={0}
             max={100}
             unit="%"
           />
-          <Slider
-            label="Wind Speed"
-            value={windSpeedRange[0]}
-            onChange={(v) => setWindSpeedRange([v, windSpeedRange[1]])}
+          <RangeSlider
+            label="Wind Speed Range"
+            minValue={windSpeedMin}
+            maxValue={windSpeedMax}
+            onMinChange={setWindSpeedMin}
+            onMaxChange={setWindSpeedMax}
             min={0}
             max={50}
             unit=" km/h"
           />
-          <Slider
-            label="UV Index"
-            value={uvIndexRange[0]}
-            onChange={(v) => setUvIndexRange([v, uvIndexRange[1]])}
+          <RangeSlider
+            label="UV Index Range"
+            minValue={uvIndexMin}
+            maxValue={uvIndexMax}
+            onMinChange={setUvIndexMin}
+            onMaxChange={setUvIndexMax}
             min={0}
             max={11}
           />
