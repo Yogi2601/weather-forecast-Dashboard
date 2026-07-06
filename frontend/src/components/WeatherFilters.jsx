@@ -630,14 +630,25 @@ export default function WeatherFilters({ onSelectCity }) {
         >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-bold text-white">Weather Condition (Optional)</h2>
-            {selectedWeather && (
+            <div className="flex items-center gap-2">
+              {selectedWeather && (
+                <button
+                  onClick={() => setSelectedWeather(null)}
+                  className="text-xs px-2 py-1 rounded bg-slate-700 text-slate-300 hover:bg-slate-600 flex items-center gap-1"
+                >
+                  <X className="w-3 h-3" /> Clear
+                </button>
+              )}
               <button
-                onClick={() => setSelectedWeather(null)}
-                className="text-xs px-2 py-1 rounded bg-slate-700 text-slate-300 hover:bg-slate-600 flex items-center gap-1"
+                onClick={() => {
+                  setSelectedState(null)
+                  setSelectedWeather(null)
+                }}
+                className="text-xs px-3 py-1 rounded bg-slate-700 text-slate-300 hover:bg-slate-600 flex items-center gap-1"
               >
-                <X className="w-3 h-3" /> Clear
+                ← Back
               </button>
-            )}
+            </div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {WEATHER_CONDITIONS.map(condition => (
@@ -655,6 +666,15 @@ export default function WeatherFilters({ onSelectCity }) {
       {/* Find Cities Button */}
       {selectedCountry && selectedState && (
         <div className="flex gap-3">
+          <button
+            onClick={() => {
+              setSelectedState(null)
+              setSelectedWeather(null)
+            }}
+            className="px-6 py-4 rounded-xl font-bold text-sm uppercase tracking-wider bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white transition-all duration-200"
+          >
+            ← Back
+          </button>
           <button
             onClick={handleFindCities}
             disabled={isSearching}
