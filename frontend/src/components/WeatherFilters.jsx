@@ -89,15 +89,23 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       setHighlightedIndex(prev =>
-        prev < filteredOptions.length - 1 ? prev + 1 : prev
+        prev < filteredOptions.length - 1 ? prev + 1 : 0
       )
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
-      setHighlightedIndex(prev => prev > 0 ? prev - 1 : -1)
+      setHighlightedIndex(prev => prev > 0 ? prev - 1 : filteredOptions.length - 1)
     } else if (e.key === 'Enter') {
       e.preventDefault()
+      // If a specific option is highlighted, select it
       if (highlightedIndex >= 0 && filteredOptions[highlightedIndex]) {
         onChange(filteredOptions[highlightedIndex])
+        setIsOpen(false)
+        setSearchInput('')
+        setHighlightedIndex(-1)
+      }
+      // If only one option matches the search, select it
+      else if (filteredOptions.length === 1) {
+        onChange(filteredOptions[0])
         setIsOpen(false)
         setSearchInput('')
         setHighlightedIndex(-1)
@@ -105,6 +113,7 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
     } else if (e.key === 'Escape') {
       e.preventDefault()
       setIsOpen(false)
+      setSearchInput('')
       setHighlightedIndex(-1)
     }
   }
@@ -139,10 +148,11 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Search..."
+                placeholder="Search and press Enter to select..."
                 value={searchInput}
                 onChange={(e) => {
                   setSearchInput(e.target.value)
+                  // Automatically highlight first matching option when typing
                   setHighlightedIndex(0)
                 }}
                 onKeyDown={handleKeyDown}
