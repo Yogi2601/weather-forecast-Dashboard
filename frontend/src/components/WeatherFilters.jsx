@@ -46,7 +46,9 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
   const [isOpen, setIsOpen] = useState(false)
   const [searchInput, setSearchInput] = useState('')
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
   const dropdownRef = useRef(null)
+  const buttonRef = useRef(null)
   const searchInputRef = useRef(null)
   const listRef = useRef(null)
 
@@ -119,9 +121,18 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
   }
 
   return (
-    <div className="relative z-20" ref={dropdownRef}>
+    <div className="relative" ref={dropdownRef}>
       <button
+        ref={buttonRef}
         onClick={() => {
+          if (!isOpen && buttonRef.current) {
+            const rect = buttonRef.current.getBoundingClientRect()
+            setDropdownPosition({
+              top: rect.bottom + window.scrollY + 8,
+              left: rect.left + window.scrollX,
+              width: rect.width
+            })
+          }
           setIsOpen(!isOpen)
           if (!isOpen) setHighlightedIndex(0)
         }}
@@ -141,8 +152,13 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-[100] overflow-hidden"
-            style={{ maxHeight: '300px' }}
+            className="fixed bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-[9999] overflow-hidden"
+            style={{
+              top: `${dropdownPosition.top}px`,
+              left: `${dropdownPosition.left}px`,
+              width: `${dropdownPosition.width}px`,
+              maxHeight: '300px'
+            }}
           >
             {isSearchable && (
               <input
