@@ -45,12 +45,16 @@ const WEATHER_CODE_TO_LABEL = {
 function Dropdown({ label, value, onChange, options, isLoading, isSearchable = false }) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchInput, setSearchInput] = useState('')
+  const [highlightedIndex, setHighlightedIndex] = useState(-1)
   const dropdownRef = useRef(null)
+  const searchInputRef = useRef(null)
+  const listRef = useRef(null)
 
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false)
+        setHighlightedIndex(-1)
       }
     }
 
@@ -72,11 +76,48 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
     return selected?.name || label
   }, [value, options, label])
 
+  const handleKeyDown = (e) => {
+    if (!isOpen) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        setIsOpen(true)
+        setHighlightedIndex(0)
+      }
+      return
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setHighlightedIndex(prev =>
+        prev < filteredOptions.length - 1 ? prev + 1 : prev
+      )
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setHighlightedIndex(prev => prev > 0 ? prev - 1 : -1)
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      if (highlightedIndex >= 0 && filteredOptions[highlightedIndex]) {
+        onChange(filteredOptions[highlightedIndex])
+        setIsOpen(false)
+        setSearchInput('')
+        setHighlightedIndex(-1)
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      setIsOpen(false)
+      setHighlightedIndex(-1)
+    }
+  }
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-800/40 border border-slate-700/60 text-slate-200 hover:border-slate-600 transition-colors"
+        onClick={() => {
+          setIsOpen(!isOpen)
+          if (!isOpen) setHighlightedIndex(0)
+        }}
+        onKeyDown={handleKeyDown}
+        className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-800/40 border border-slate-700/60 text-slate-200 hover:border-slate-600 transition-colors focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/25"
       >
         <span className="text-sm font-medium truncate">{displayValue}</span>
         <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -96,16 +137,21 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
           >
             {isSearchable && (
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search..."
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={(e) => {
+                  setSearchInput(e.target.value)
+                  setHighlightedIndex(0)
+                }}
+                onKeyDown={handleKeyDown}
                 autoFocus
-                className="w-full px-4 py-2 bg-slate-900/50 border-b border-slate-700 text-sm text-slate-200 placeholder-slate-500 outline-none"
+                className="w-full px-4 py-2 bg-slate-900/50 border-b border-slate-700 text-sm text-slate-200 placeholder-slate-500 outline-none focus:ring-1 focus:ring-blue-500/25"
               />
             )}
 
-            <div className="overflow-y-auto max-h-64">
+            <div className="overflow-y-auto max-h-64" ref={listRef}>
               {isLoading ? (
                 <div className="flex items-center justify-center py-6 text-slate-400">
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -113,16 +159,20 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
               ) : filteredOptions.length === 0 ? (
                 <div className="py-6 text-center text-slate-400 text-sm">No options found</div>
               ) : (
-                filteredOptions.map(option => (
+                filteredOptions.map((option, index) => (
                   <button
                     key={option.isoCode}
                     onClick={() => {
                       onChange(option)
                       setIsOpen(false)
                       setSearchInput('')
+                      setHighlightedIndex(-1)
                     }}
+                    onMouseEnter={() => setHighlightedIndex(index)}
                     className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
-                      value === option.isoCode
+                      highlightedIndex === index
+                        ? 'bg-blue-500/25 text-white'
+                        : value === option.isoCode
                         ? 'bg-blue-600/20 text-blue-300'
                         : 'text-slate-300 hover:bg-slate-700/50'
                     }`}
