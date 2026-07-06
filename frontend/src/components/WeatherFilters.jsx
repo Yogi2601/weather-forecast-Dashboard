@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, Loader2, Wind, X } from 'lucide-react'
+import { ChevronDown, Loader2, X } from 'lucide-react'
 import {
   getAllCountries,
   getStatesByCountry,
@@ -17,19 +17,6 @@ const WEATHER_CONDITIONS = [
   { id: 'fog', label: 'Fog', emoji: '🌫️', codes: [45, 48] },
   { id: 'drizzle', label: 'Drizzle', emoji: '🌦️', codes: [51, 53, 55] },
   { id: 'freezing', label: 'Freezing', emoji: '❄️', codes: [71, 73, 75, 77] },
-]
-
-const AIR_QUALITY_LEVELS = [
-  { id: 'excellent', label: 'Excellent', color: 'bg-emerald-500/20 border-emerald-500/30' },
-  { id: 'good', label: 'Good', color: 'bg-blue-500/20 border-blue-500/30' },
-  { id: 'moderate', label: 'Moderate', color: 'bg-yellow-500/20 border-yellow-500/30' },
-  { id: 'poor', label: 'Poor', color: 'bg-red-500/20 border-red-500/30' },
-]
-
-const VISIBILITY_LEVELS = [
-  { id: 'high', label: 'High', range: [8, 10] },
-  { id: 'medium', label: 'Medium', range: [4, 8] },
-  { id: 'low', label: 'Low', range: [0, 4] },
 ]
 
 function Dropdown({ label, value, onChange, options, isLoading, isSearchable = false }) {
@@ -128,44 +115,6 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
   )
 }
 
-function RangeSlider({ label, minValue, maxValue, onMinChange, onMaxChange, min = 0, max = 100, unit = '' }) {
-  return (
-    <div className="space-y-3">
-      <label className="text-sm font-medium text-slate-300">{label}</label>
-      <div className="flex gap-4 items-end">
-        <div className="flex-1">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-slate-500">Min</span>
-            <span className="text-sm font-bold text-blue-400">{minValue}{unit}</span>
-          </div>
-          <input
-            type="range"
-            min={min}
-            max={max}
-            value={minValue}
-            onChange={(e) => onMinChange(parseFloat(e.target.value))}
-            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-          />
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-slate-500">Max</span>
-            <span className="text-sm font-bold text-blue-400">{maxValue}{unit}</span>
-          </div>
-          <input
-            type="range"
-            min={min}
-            max={max}
-            value={maxValue}
-            onChange={(e) => onMaxChange(parseFloat(e.target.value))}
-            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-          />
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function WeatherConditionCard({ condition, isSelected, onClick }) {
   return (
     <motion.button
@@ -209,32 +158,122 @@ function WeatherConditionCard({ condition, isSelected, onClick }) {
   )
 }
 
+function CityResultsModal({ cities, isOpen, onClose, onSelectCity, selectedCountry, selectedState, isLoading }) {
+  if (!isOpen) return null
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center p-4"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-slate-900/95 border border-slate-800 rounded-3xl w-full max-w-4xl max-h-[80vh] overflow-y-auto backdrop-blur-md"
+      >
+        <div className="sticky top-0 bg-slate-900/95 border-b border-slate-800 p-6 flex items-center justify-between z-10">
+          <div>
+            <h2 className="text-2xl font-bold text-white">
+              {isLoading ? 'Loading Cities...' : `${cities.length} Cities Found`}
+            </h2>
+            {selectedState && selectedCountry && (
+              <p className="text-sm text-slate-400 mt-1">{selectedState.name}, {selectedCountry.name}</p>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="p-6">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
+            </div>
+          ) : cities.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-slate-400 text-lg">No cities found matching your criteria.</p>
+              <p className="text-slate-500 text-sm mt-2">Try adjusting your weather filters.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {cities.map((city, index) => (
+                <motion.div
+                  key={`${city.name}-${city.latitude}-${city.longitude}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: index * 0.03 }}
+                  className="rounded-xl border border-slate-800 bg-slate-800/40 p-4 backdrop-blur-md hover:border-slate-700 hover:bg-slate-800/60 transition-all group cursor-pointer"
+                  onClick={() => onSelectCity?.(city)}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="text-base font-bold text-white">{city.name}</h3>
+                    </div>
+                    <motion.span className="text-2xl group-hover:scale-110 transition-transform">
+                      {city.icon || '🌡️'}
+                    </motion.span>
+                  </div>
+
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">Temperature</span>
+                      <span className="font-semibold text-white">{Math.round(city.temp)}°C</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">Condition</span>
+                      <span className="text-blue-400 font-semibold">{city.condition}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">Humidity</span>
+                      <span className="text-slate-300">{city.humidity}%</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">Wind</span>
+                      <span className="text-slate-300">{Math.round(city.wind_speed)} km/h</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onSelectCity?.(city)
+                    }}
+                    className="w-full mt-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg font-semibold text-xs uppercase tracking-wider hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-95"
+                  >
+                    View Details
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
 export default function WeatherFilters({ onSelectCity }) {
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [selectedState, setSelectedState] = useState(null)
   const [selectedWeather, setSelectedWeather] = useState(null)
-  const [selectedAirQuality, setSelectedAirQuality] = useState(null)
-  const [selectedVisibility, setSelectedVisibility] = useState(null)
 
   const [countries, setCountries] = useState([])
   const [states, setStates] = useState([])
-  const [cities, setCities] = useState([])
-
-  const [tempMin, setTempMin] = useState(-30)
-  const [tempMax, setTempMax] = useState(50)
-  const [humidityMin, setHumidityMin] = useState(0)
-  const [humidityMax, setHumidityMax] = useState(100)
-  const [windSpeedMin, setWindSpeedMin] = useState(0)
-  const [windSpeedMax, setWindSpeedMax] = useState(50)
-  const [uvIndexMin, setUvIndexMin] = useState(0)
-  const [uvIndexMax, setUvIndexMax] = useState(11)
-  const [rainProbability, setRainProbability] = useState(50)
 
   const [isLoadingCountries, setIsLoadingCountries] = useState(false)
   const [isLoadingStates, setIsLoadingStates] = useState(false)
-  const [isLoadingCities, setIsLoadingCities] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState([])
+  const [showResults, setShowResults] = useState(false)
 
   useEffect(() => {
     const loadCountries = async () => {
@@ -256,7 +295,6 @@ export default function WeatherFilters({ onSelectCity }) {
     if (!selectedCountry) {
       setStates([])
       setSelectedState(null)
-      setCities([])
       return
     }
 
@@ -272,24 +310,6 @@ export default function WeatherFilters({ onSelectCity }) {
     }
   }, [selectedCountry])
 
-  useEffect(() => {
-    if (!selectedCountry || !selectedState) {
-      setCities([])
-      return
-    }
-
-    setIsLoadingCities(true)
-    try {
-      const cityList = getCitiesByState(selectedCountry.isoCode, selectedState.isoCode)
-      setCities(cityList)
-    } catch (error) {
-      console.error('Error loading cities:', error)
-      setCities([])
-    } finally {
-      setIsLoadingCities(false)
-    }
-  }, [selectedCountry, selectedState])
-
   const handleFindCities = useCallback(async () => {
     if (!selectedCountry || !selectedState) {
       alert('Please select a country and state')
@@ -297,44 +317,66 @@ export default function WeatherFilters({ onSelectCity }) {
     }
 
     setIsSearching(true)
+    setShowResults(true)
     setSearchResults([])
 
     try {
       const cityList = getCitiesByState(selectedCountry.isoCode, selectedState.isoCode)
-      let results = []
 
-      const fetchCityWeather = async (city) => {
-        try {
-          const rawResponse = await fetch(`/api/weather/coords/${city.latitude}/${city.longitude}`)
-          if (!rawResponse.ok) throw new Error('Failed to fetch weather')
-          const data = await rawResponse.json()
-
-          const weatherWithCodes = {
-            ...city,
-            temp: data.current?.temperature_2m || 0,
-            feels_like: data.current?.apparent_temperature || 0,
-            humidity: data.current?.relative_humidity_2m || 0,
-            wind_speed: data.current?.wind_speed_10m || 0,
-            weather_code: data.current?.weather_code || 0,
-            condition: data.current?.condition || 'Unknown',
-            icon: data.current?.icon || '🌡️',
-            uv_index: data.current?.uv_index || 0,
-            visibility: (data.current?.visibility || 0) / 1000,
-            rain_probability: 0,
-            aqi: 'Good',
-          }
-          return {
-            ...weatherWithCodes,
-            matchesFilters: matchesAllFilters(weatherWithCodes),
-          }
-        } catch (error) {
-          console.error(`Error fetching weather for ${city.name}:`, error)
-          return null
-        }
+      // If no weather filter, show all cities
+      if (!selectedWeather) {
+        const basicCities = cityList.map(city => ({
+          ...city,
+          temp: 0,
+          feels_like: 0,
+          humidity: 0,
+          wind_speed: 0,
+          condition: 'Unknown',
+          icon: '🌡️',
+          weather_code: 0,
+        }))
+        setSearchResults(basicCities)
+        setIsSearching(false)
+        return
       }
 
-      const weatherData = await Promise.all(cityList.map(fetchCityWeather))
-      results = weatherData.filter(Boolean).filter(r => r.matchesFilters)
+      // Filter by weather condition - fetch in parallel batches
+      const BATCH_SIZE = 10
+      let results = []
+
+      for (let i = 0; i < cityList.length; i += BATCH_SIZE) {
+        const batch = cityList.slice(i, i + BATCH_SIZE)
+        const batchResults = await Promise.all(
+          batch.map(async (city) => {
+            try {
+              const rawResponse = await fetch(`/api/weather/coords/${city.latitude}/${city.longitude}`)
+              if (!rawResponse.ok) return null
+              const data = await rawResponse.json()
+
+              const weatherCode = data.current?.weather_code || 0
+              const selectedWeatherCodes = WEATHER_CONDITIONS.find(w => w.id === selectedWeather)?.codes || []
+
+              if (selectedWeatherCodes.includes(weatherCode)) {
+                return {
+                  ...city,
+                  temp: data.current?.temperature_2m || 0,
+                  feels_like: data.current?.apparent_temperature || 0,
+                  humidity: data.current?.relative_humidity_2m || 0,
+                  wind_speed: data.current?.wind_speed_10m || 0,
+                  weather_code: weatherCode,
+                  condition: data.current?.condition || 'Unknown',
+                  icon: data.current?.icon || '🌡️',
+                }
+              }
+              return null
+            } catch (error) {
+              console.error(`Error fetching weather for ${city.name}:`, error)
+              return null
+            }
+          })
+        )
+        results = results.concat(batchResults.filter(Boolean))
+      }
 
       setSearchResults(results)
     } catch (error) {
@@ -343,34 +385,11 @@ export default function WeatherFilters({ onSelectCity }) {
     } finally {
       setIsSearching(false)
     }
-  }, [selectedCountry, selectedState])
-
-  const matchesAllFilters = useCallback((weather) => {
-    if (selectedWeather) {
-      const weatherCodes = WEATHER_CONDITIONS.find(w => w.id === selectedWeather)?.codes || []
-      if (!weatherCodes.includes(weather.weather_code)) return false
-    }
-
-    if (weather.temp < tempMin || weather.temp > tempMax) return false
-    if (weather.humidity < humidityMin || weather.humidity > humidityMax) return false
-    if (weather.wind_speed < windSpeedMin || weather.wind_speed > windSpeedMax) return false
-    if (weather.uv_index < uvIndexMin || weather.uv_index > uvIndexMax) return false
-    if (weather.rain_probability && weather.rain_probability < rainProbability) return false
-
-    if (selectedAirQuality && weather.aqi !== selectedAirQuality) return false
-
-    if (selectedVisibility) {
-      const visibilityLevel = VISIBILITY_LEVELS.find(v => v.id === selectedVisibility)
-      const [min, max] = visibilityLevel.range
-      if (!weather.visibility || weather.visibility < min || weather.visibility > max) return false
-    }
-
-    return true
-  }, [selectedWeather, tempMin, tempMax, humidityMin, humidityMax, windSpeedMin, windSpeedMax, uvIndexMin, uvIndexMax, rainProbability, selectedAirQuality, selectedVisibility])
+  }, [selectedCountry, selectedState, selectedWeather])
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Section 1: Location Filters */}
+      {/* Location Filters */}
       <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md">
         <h2 className="text-lg font-bold text-white mb-6">Location</h2>
         <div className="space-y-4">
@@ -396,7 +415,7 @@ export default function WeatherFilters({ onSelectCity }) {
         </div>
       </div>
 
-      {/* Section 2: Weather Condition Filters - Only show after country+state selected */}
+      {/* Weather Condition Filters - Only show after country+state selected */}
       {selectedCountry && selectedState && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -405,7 +424,7 @@ export default function WeatherFilters({ onSelectCity }) {
           className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md"
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-white">Weather Condition</h2>
+            <h2 className="text-lg font-bold text-white">Weather Condition (Optional)</h2>
             {selectedWeather && (
               <button
                 onClick={() => setSelectedWeather(null)}
@@ -428,98 +447,7 @@ export default function WeatherFilters({ onSelectCity }) {
         </motion.div>
       )}
 
-      {/* Section 3: Extra Weather Filters - Only show after country+state selected */}
-      {selectedCountry && selectedState && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-          className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md"
-        >
-          <h2 className="text-lg font-bold text-white mb-6">Additional Filters</h2>
-          <div className="space-y-6">
-            <RangeSlider
-              label="Temperature Range"
-              minValue={tempMin}
-              maxValue={tempMax}
-              onMinChange={setTempMin}
-              onMaxChange={setTempMax}
-              min={-30}
-              max={50}
-              unit="°C"
-            />
-            <RangeSlider
-              label="Humidity Range"
-              minValue={humidityMin}
-              maxValue={humidityMax}
-              onMinChange={setHumidityMin}
-              onMaxChange={setHumidityMax}
-              min={0}
-              max={100}
-              unit="%"
-            />
-            <RangeSlider
-              label="Wind Speed Range"
-              minValue={windSpeedMin}
-              maxValue={windSpeedMax}
-              onMinChange={setWindSpeedMin}
-              onMaxChange={setWindSpeedMax}
-              min={0}
-              max={50}
-              unit=" km/h"
-            />
-            <RangeSlider
-              label="UV Index Range"
-              minValue={uvIndexMin}
-              maxValue={uvIndexMax}
-              onMinChange={setUvIndexMin}
-              onMaxChange={setUvIndexMax}
-              min={0}
-              max={11}
-            />
-
-            <div className="pt-4 border-t border-slate-700">
-              <label className="text-sm font-medium text-slate-300 mb-3 block">Air Quality</label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {AIR_QUALITY_LEVELS.map(level => (
-                  <button
-                    key={level.id}
-                    onClick={() => setSelectedAirQuality(selectedAirQuality === level.id ? null : level.id)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      selectedAirQuality === level.id
-                        ? `${level.color} border-2`
-                        : 'bg-slate-800/40 border border-slate-700 text-slate-300 hover:border-slate-600'
-                    }`}
-                  >
-                    {level.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-slate-700">
-              <label className="text-sm font-medium text-slate-300 mb-3 block">Visibility</label>
-              <div className="grid grid-cols-3 gap-2">
-                {VISIBILITY_LEVELS.map(level => (
-                  <button
-                    key={level.id}
-                    onClick={() => setSelectedVisibility(selectedVisibility === level.id ? null : level.id)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      selectedVisibility === level.id
-                        ? 'bg-blue-600/20 border-2 border-blue-500 text-blue-300'
-                        : 'bg-slate-800/40 border border-slate-700 text-slate-300 hover:border-slate-600'
-                    }`}
-                  >
-                    {level.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Section 4: Find Cities Button */}
+      {/* Find Cities Button */}
       {selectedCountry && selectedState && (
         <div className="flex gap-3">
           <button
@@ -543,88 +471,23 @@ export default function WeatherFilters({ onSelectCity }) {
         </div>
       )}
 
-      {/* Search Results */}
-      {searchResults.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-bold text-white">
-            {searchResults.length} {searchResults.length === 1 ? 'City' : 'Cities'} Found
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {searchResults.map((city, index) => (
-              <motion.div
-                key={`${city.name}-${city.latitude}-${city.longitude}`}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 backdrop-blur-md hover:border-slate-700 transition-all group cursor-pointer"
-                onClick={() => onSelectCity?.({ name: city.name, latitude: city.latitude, longitude: city.longitude })}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-white">{city.name}</h3>
-                    <p className="text-sm text-slate-400 mt-1">{selectedState?.name}, {selectedCountry?.name}</p>
-                  </div>
-                  <motion.span className="text-3xl group-hover:scale-110 transition-transform" whileHover={{ scale: 1.2 }}>
-                    {city.icon || '🌡️'}
-                  </motion.span>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-400">Temperature</span>
-                    <span className="text-lg font-bold text-white">{Math.round(city.temp)}°C</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-400">Condition</span>
-                    <span className="text-sm font-semibold text-blue-400">{city.condition}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-400">Humidity</span>
-                    <span className="text-sm font-semibold text-slate-300">{city.humidity}%</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-400 flex items-center gap-1">
-                      <Wind className="w-3 h-3" /> Wind
-                    </span>
-                    <span className="text-sm font-semibold text-slate-300">{Math.round(city.wind_speed)} km/h</span>
-                  </div>
-                  {city.aqi && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-400">Air Quality</span>
-                      <span className="text-sm font-semibold text-slate-300">{city.aqi}</span>
-                    </div>
-                  )}
-                  {city.feels_like && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-400">Feels Like</span>
-                      <span className="text-sm font-semibold text-slate-300">{Math.round(city.feels_like)}°C</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-2 mt-6">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onSelectCity?.({ name: city.name, latitude: city.latitude, longitude: city.longitude })
-                    }}
-                    className="flex-1 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg font-semibold text-xs uppercase tracking-wider hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-95"
-                  >
-                    Open
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {searchResults.length === 0 && isSearching === false && selectedCountry && selectedState && (
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-8 text-center backdrop-blur-md">
-          <p className="text-slate-400">No cities match your filters. Try adjusting them.</p>
-        </div>
-      )}
+      {/* City Results Modal */}
+      <CityResultsModal
+        cities={searchResults}
+        isOpen={showResults}
+        onClose={() => setShowResults(false)}
+        onSelectCity={(cityData) => {
+          setShowResults(false)
+          onSelectCity?.({
+            name: cityData.name,
+            latitude: cityData.latitude,
+            longitude: cityData.longitude
+          })
+        }}
+        selectedCountry={selectedCountry}
+        selectedState={selectedState}
+        isLoading={isSearching}
+      />
     </div>
   )
 }
