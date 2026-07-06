@@ -96,8 +96,8 @@ export default function App() {
       let data
       if (latitude !== undefined && longitude !== undefined) {
         // Use coordinates endpoint
-        console.log('Fetching weather using coordinates:', latitude, longitude)
-        data = await fetchWeatherByCoordinates(latitude, longitude)
+        console.log('Fetching weather using coordinates:', latitude, longitude, displayName)
+        data = await fetchWeatherByCoordinates(latitude, longitude, displayName)
       } else {
         // Use city name endpoint
         console.log('Fetching weather using city name:', city)

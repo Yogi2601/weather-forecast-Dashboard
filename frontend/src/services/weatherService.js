@@ -70,7 +70,7 @@ export async function fetchWeatherForCity(cityName) {
   return mapWeatherResponse(data, cityName);
 }
 
-export async function fetchWeatherByCoordinates(latitude, longitude) {
+export async function fetchWeatherByCoordinates(latitude, longitude, cityName = "Current Location") {
   let response;
 
   try {
@@ -96,7 +96,7 @@ export async function fetchWeatherByCoordinates(latitude, longitude) {
     throw new Error(data.message);
   }
 
-  return mapWeatherResponse(data, "Current Location");
+  return mapWeatherResponse(data, cityName);
 }
 
 export async function getWeatherByCoordinates({ name }) {
