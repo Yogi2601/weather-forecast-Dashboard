@@ -1,10 +1,11 @@
 import React from 'react'
-import { LayoutDashboard, Heart, BarChart3, CloudSun, X } from 'lucide-react'
+import { LayoutDashboard, Heart, BarChart3, CloudSun, X, Cloud } from 'lucide-react'
 
 export default function Sidebar({ activeTab, setActiveTab, sidebarOpen, setSidebarOpen }) {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'saved', label: 'Saved Locations', icon: Heart },
+    { id: 'filters', label: 'Weather Filters', icon: Cloud },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   ]
 

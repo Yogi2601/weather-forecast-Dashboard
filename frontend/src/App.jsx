@@ -15,6 +15,7 @@ import WeatherAlertsCard from './components/WeatherAlertsCard'
 import WeatherStatisticsCard from './components/WeatherStatisticsCard'
 import AnalyticsDashboard from './components/AnalyticsDashboard'
 import SavedLocations from './components/SavedLocations'
+import WeatherFilters from './components/WeatherFilters'
 import { fetchHistoricalWeather, transformHistoricalToAnalytics } from './services/analyticsService'
 import useCitySearchHistory from './hooks/useCitySearchHistory'
 import useAppSettings from './hooks/useAppSettings'
@@ -248,6 +249,11 @@ export default function App() {
           {/* Analytics View */}
           {activeTab === 'analytics' ? (
             <AnalyticsDashboard weatherData={weather} />
+          ) : activeTab === 'filters' ? (
+            <WeatherFilters onSelectCity={(cityData) => {
+              setActiveTab('dashboard')
+              handleSearch(cityData)
+            }} />
           ) : activeTab === 'saved' ? (
             <SavedLocations onSelectLocation={handleSearch} currentCity={weather.city} />
           ) : activeTab === 'dashboard' ? (
