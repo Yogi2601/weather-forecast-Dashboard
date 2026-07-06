@@ -435,18 +435,23 @@ export default function WeatherFilters({ onSelectCity }) {
 
   const handleSelectCity = useCallback((cityData) => {
     setShowResults(false)
+
+    const cityObject = {
+      name: cityData.name,
+      latitude: cityData.latitude,
+      longitude: cityData.longitude,
+      state: selectedState?.name || '',
+      country: selectedCountry?.name || '',
+    }
+
     // Reset filters after selection
     setSelectedCountry(null)
     setSelectedState(null)
     setSelectedWeather(null)
     setSearchResults([])
 
-    onSelectCity?.({
-      name: cityData.name,
-      latitude: cityData.latitude,
-      longitude: cityData.longitude
-    })
-  }, [onSelectCity])
+    onSelectCity?.(cityObject)
+  }, [onSelectCity, selectedCountry, selectedState])
 
   return (
     <div className="space-y-6 pb-12">
