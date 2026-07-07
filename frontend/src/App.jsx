@@ -27,6 +27,10 @@ import NotificationCenter from './components/NotificationCenter'
 import HourlyForecast from './components/HourlyForecast'
 import HourlyChart from './components/HourlyChart'
 import WeatherTimeline from './components/WeatherTimeline'
+import { FloatingChatButton } from './components/AIAssistant/FloatingChatButton'
+import { ChatPanel } from './components/AIAssistant/ChatPanel'
+import { useAIChat } from './hooks/useAIChat'
+import { buildWeatherContext } from './utils/weatherContextBuilder'
 
 const DEFAULT_WEATHER_DATA = {
   city: 'San Francisco',
@@ -58,6 +62,7 @@ export default function App() {
   const [lastFavoritesCount, setLastFavoritesCount] = useState(favorites.length)
   const [historicalData, setHistoricalData] = useState(null)
   const [lastRefreshTime, setLastRefreshTime] = useState(null)
+  const { chatOpen, toggleChat, messages, isLoading: aiLoading, addMessage, setLoadingState, sendMessageWithContext: sendAIMessage, messageMetadata } = useAIChat()
 
   useEffect(() => {
     if (favorites.length > lastFavoritesCount) {
@@ -389,6 +394,26 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {/* AI Weather Assistant - Floating Chat Button & Panel */}
+      <FloatingChatButton isOpen={chatOpen} onToggle={toggleChat} />
+      <ChatPanel
+        isOpen={chatOpen}
+        onClose={toggleChat}
+        weatherData={weather}
+        isLoading={aiLoading}
+        messages={messages}
+        messageMetadata={messageMetadata}
+        onSendMessage={(message) => {
+          addMessage('user', message)
+          // Send to AI backend with unified WeatherContext
+          sendAIMessage(message, weather, {
+            airQuality: null,
+            alerts: [],
+            weatherHistory: historicalData,
+          })
+        }}
+      />
     </div>
   )
 }

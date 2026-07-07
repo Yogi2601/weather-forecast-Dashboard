@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine, get_db
 from app import crud
 from app import services
+from app import ai_routes
 
 app = FastAPI(
     title="Weather Dashboard API",
@@ -22,6 +23,9 @@ app.add_middleware(
 )
 
 Base.metadata.create_all(bind=engine)
+
+# Register AI routes
+app.include_router(ai_routes.router)
 
 
 @app.get("/")
