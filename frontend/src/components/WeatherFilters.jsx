@@ -119,14 +119,14 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
   }
 
   return (
-    <div className="relative z-20" ref={dropdownRef}>
+    <div className="relative" ref={dropdownRef} style={{ zIndex: isOpen ? 50 : 20 }}>
       <button
         onClick={() => {
           setIsOpen(!isOpen)
           if (!isOpen) setHighlightedIndex(0)
         }}
         onKeyDown={handleKeyDown}
-        className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-800/40 border border-slate-700/60 text-slate-200 hover:border-slate-600 transition-colors focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/25"
+        className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-800/40 border border-slate-700/60 text-slate-200 hover:border-slate-600 transition-colors focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/25 relative z-10"
       >
         <span className="text-sm font-medium truncate">{displayValue}</span>
         <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -141,8 +141,8 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-[100] overflow-visible"
-            style={{ maxHeight: '300px' }}
+            className="absolute top-full left-0 right-0 mt-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl overflow-hidden"
+            style={{ maxHeight: '250px', zIndex: 1000 }}
           >
             {isSearchable && (
               <input
@@ -161,7 +161,7 @@ function Dropdown({ label, value, onChange, options, isLoading, isSearchable = f
               />
             )}
 
-            <div className="overflow-y-auto max-h-64" ref={listRef}>
+            <div className="overflow-y-auto max-h-56" ref={listRef}>
               {isLoading ? (
                 <div className="flex items-center justify-center py-6 text-slate-400">
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -453,6 +453,12 @@ export default function WeatherFilters({ onSelectCity }) {
       try {
         const countryList = getAllCountries()
         setCountries(countryList)
+
+        // Set India as default country
+        const india = countryList.find(country => country.isoCode === 'IN')
+        if (india) {
+          setSelectedCountry(india)
+        }
       } catch (error) {
         console.error('Error loading countries:', error)
       } finally {
@@ -474,6 +480,14 @@ export default function WeatherFilters({ onSelectCity }) {
     try {
       const stateList = getStatesByCountry(selectedCountry.isoCode)
       setStates(stateList)
+
+      // Set Maharashtra as default state for India
+      if (selectedCountry.isoCode === 'IN') {
+        const maharashtra = stateList.find(state => state.isoCode === 'MH')
+        if (maharashtra) {
+          setSelectedState(maharashtra)
+        }
+      }
     } catch (error) {
       console.error('Error loading states:', error)
       setStates([])
@@ -595,9 +609,9 @@ export default function WeatherFilters({ onSelectCity }) {
   return (
     <div className="space-y-6 pb-12">
       {/* Location Filters */}
-      <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md relative z-0 overflow-visible">
+      <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md relative overflow-visible" style={{ paddingBottom: '280px' }}>
         <h2 className="text-lg font-bold text-white mb-6">Location</h2>
-        <div className="space-y-4 relative overflow-visible">
+        <div className="space-y-4 relative">
           <Dropdown
             label="Select Country"
             value={selectedCountry?.isoCode}
@@ -618,27 +632,46 @@ export default function WeatherFilters({ onSelectCity }) {
             />
           )}
         </div>
+
+        {/* Reset to Default Location Button */}
+        <button
+          onClick={() => {
+            const countryList = countries
+            const india = countryList.find(country => country.isoCode === 'IN')
+            if (india) {
+              setSelectedCountry(india)
+              const stateList = getStatesByCountry('IN')
+              const maharashtra = stateList.find(state => state.isoCode === 'MH')
+              if (maharashtra) {
+                setSelectedState(maharashtra)
+              }
+            }
+          }}
+          className="mt-4 text-xs px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white transition-colors"
+        >
+          ↻ Default Location (India, Maharashtra)
+        </button>
       </div>
 
-      {/* Weather Condition Filters - Only show after country+state selected */}
-      {selectedCountry && selectedState && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md"
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-white">Weather Condition (Optional)</h2>
-            <div className="flex items-center gap-2">
-              {selectedWeather && (
-                <button
-                  onClick={() => setSelectedWeather(null)}
-                  className="text-xs px-2 py-1 rounded bg-slate-700 text-slate-300 hover:bg-slate-600 flex items-center gap-1"
-                >
-                  <X className="w-3 h-3" /> Clear
-                </button>
-              )}
+      {/* Weather Condition Filters - Always visible */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="rounded-3xl border border-slate-800 bg-slate-900/40 p-8 backdrop-blur-md relative z-0"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-bold text-white">Weather Condition (Optional)</h2>
+          <div className="flex items-center gap-2">
+            {selectedWeather && (
+              <button
+                onClick={() => setSelectedWeather(null)}
+                className="text-xs px-2 py-1 rounded bg-slate-700 text-slate-300 hover:bg-slate-600 flex items-center gap-1"
+              >
+                <X className="w-3 h-3" /> Clear
+              </button>
+            )}
+            {selectedState && (
               <button
                 onClick={() => {
                   setSelectedState(null)
@@ -648,8 +681,9 @@ export default function WeatherFilters({ onSelectCity }) {
               >
                 ← Back
               </button>
-            </div>
+            )}
           </div>
+        </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {WEATHER_CONDITIONS.map(condition => (
               <WeatherConditionCard
@@ -661,7 +695,6 @@ export default function WeatherFilters({ onSelectCity }) {
             ))}
           </div>
         </motion.div>
-      )}
 
       {/* Find Cities Button */}
       {selectedCountry && selectedState && (

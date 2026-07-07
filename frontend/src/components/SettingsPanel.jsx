@@ -17,7 +17,11 @@ function SegmentedControl({ options, value, onChange }) {
             key={option.value}
             type="button"
             disabled={isDisabled}
-            onClick={() => !isDisabled && onChange(option.value)}
+            onClick={() => {
+              if (!isDisabled) {
+                onChange(option.value)
+              }
+            }}
             className={`relative flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all ${
               isActive
                 ? 'border-blue-500/40 bg-blue-500/15 text-white'

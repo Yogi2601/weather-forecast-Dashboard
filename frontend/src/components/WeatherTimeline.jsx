@@ -1,6 +1,7 @@
 import React, { memo, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Sun, Cloud, CloudRain, CloudSnow, CloudLightning, GitCommitHorizontal } from 'lucide-react'
+import LightRaysBackground from './WeatherBackgrounds/LightRaysBackground'
 
 const ICONS = {
   sunny: Sun,
@@ -74,9 +75,13 @@ function WeatherTimeline({ hourlyForecast = [] }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="rounded-3xl border border-slate-800 bg-slate-900/40 p-6 backdrop-blur-md shadow-2xl shadow-blue-950/10"
+      className="rounded-3xl border border-slate-800 bg-slate-900/40 p-6 backdrop-blur-md shadow-2xl shadow-blue-950/10 relative overflow-hidden"
     >
-      <div className="mb-5">
+      {/* Light rays background */}
+      <LightRaysBackground weatherCode={hours[0]?.weather_code || 0} opacity={0.12} />
+
+      <div className="relative z-10">
+        <div className="mb-5">
         <h2 className="flex items-center gap-2 text-lg font-bold text-white tracking-tight">
           <GitCommitHorizontal className="h-4 w-4 text-blue-400" />
           Weather Timeline
@@ -166,6 +171,7 @@ function WeatherTimeline({ hourlyForecast = [] }) {
               )
             })}
           </div>
+        </div>
         </div>
       </div>
     </motion.div>

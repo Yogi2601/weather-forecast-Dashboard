@@ -16,6 +16,7 @@ import WeatherStatisticsCard from './components/WeatherStatisticsCard'
 import AnalyticsDashboard from './components/AnalyticsDashboard'
 import SavedLocations from './components/SavedLocations'
 import WeatherFilters from './components/WeatherFilters'
+import PremiumQuickAccessBackground from './components/WeatherBackgrounds/PremiumQuickAccessBackground'
 import { fetchHistoricalWeather, transformHistoricalToAnalytics } from './services/analyticsService'
 import useCitySearchHistory from './hooks/useCitySearchHistory'
 import useAppSettings from './hooks/useAppSettings'
@@ -198,30 +199,32 @@ export default function App() {
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden">
       {/* Sidebar Navigation */}
-      <Sidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        sidebarOpen={sidebarOpen} 
-        setSidebarOpen={setSidebarOpen} 
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <Navbar
-          setSidebarOpen={setSidebarOpen}
-          onSearch={handleSearch}
-          onNavigateToFilters={() => setActiveTab('filters')}
-          recentSearches={recentSearches}
-          favorites={favorites}
-          isFavorite={isFavorite}
-          onToggleFavorite={toggleFavorite}
-          onUseCurrentLocation={handleUseCurrentLocation}
-          gpsStatus={gpsStatus}
-          gpsMessage={gpsMessage}
-          onOpenSettings={() => setSettingsOpen(true)}
-          onOpenNotifications={() => setNotificationsOpen(true)}
-          unreadNotificationCount={unreadCount}
-        />
+      <div className="flex-1 flex flex-col min-w-0 h-screen">
+        <div className="flex-shrink-0 bg-slate-950 border-b border-slate-800 z-40">
+          <Navbar
+            setSidebarOpen={setSidebarOpen}
+            onSearch={handleSearch}
+            onNavigateToFilters={() => setActiveTab('filters')}
+            recentSearches={recentSearches}
+            favorites={favorites}
+            isFavorite={isFavorite}
+            onToggleFavorite={toggleFavorite}
+            onUseCurrentLocation={handleUseCurrentLocation}
+            gpsStatus={gpsStatus}
+            gpsMessage={gpsMessage}
+            onOpenSettings={() => setSettingsOpen(true)}
+            onOpenNotifications={() => setNotificationsOpen(true)}
+            unreadNotificationCount={unreadCount}
+          />
+        </div>
 
         <SettingsPanel
           isOpen={settingsOpen}
@@ -246,7 +249,7 @@ export default function App() {
           onDelete={deleteNotification}
         />
 
-        <main className="flex-1 p-6 space-y-6 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-6 space-y-6 max-w-7xl w-full mx-auto overflow-y-auto">
           {/* Analytics View */}
           {activeTab === 'analytics' ? (
             <AnalyticsDashboard weatherData={weather} />
@@ -274,7 +277,11 @@ export default function App() {
                 </div>
 
                 {/* Right side info panel: Quick Access & Recent searches */}
-                <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-6 flex flex-col justify-between space-y-4 backdrop-blur-md">
+                <div className="rounded-3xl border border-slate-800 bg-slate-900/40 p-6 flex flex-col justify-between space-y-4 backdrop-blur-md relative overflow-hidden">
+                  {/* Premium weather-aware animated background */}
+                  <PremiumQuickAccessBackground weatherCode={weather?.weather_code || 0} opacity={0.18} />
+
+                  <div className="relative z-10">
                   <div>
                     <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
                       <Star className="w-4 h-4 text-amber-500" />
@@ -316,6 +323,7 @@ export default function App() {
                         </button>
                       ))}
                     </div>
+                  </div>
                 </div>
 
               </div>

@@ -2,6 +2,7 @@ import React, { memo, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Navigation, Wind, Gauge } from 'lucide-react'
 import WindTurbine from './Windmill'
+import WeatherEnvironment from './Weather3D/WeatherEnvironment'
 
 const COMPASS_POINTS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
 
@@ -170,16 +171,20 @@ function WindCard({ weatherData }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="rounded-3xl border border-slate-800 bg-slate-900/40 p-6 backdrop-blur-md shadow-2xl shadow-blue-950/10 relative"
+      className="rounded-3xl border border-slate-800 bg-slate-900/40 p-6 backdrop-blur-md shadow-2xl shadow-blue-950/10 relative overflow-hidden"
     >
-      {/* Header */}
-      <div className="mb-5">
+      {/* 3D Weather Environment Background */}
+      <div className="absolute inset-0 rounded-3xl overflow-hidden" style={{ zIndex: 0 }}>
+        <WeatherEnvironment weather={weatherData} windSpeed={speed} />
+      </div>
+      {/* Header - Above background */}
+      <div className="mb-5 relative z-20">
         <h2 className="text-lg font-bold text-white tracking-tight">Wind</h2>
         <p className="mt-1 text-sm text-slate-500">Live speed, gusts, and direction</p>
       </div>
 
-      {/* Top-right wind information block */}
-      <div className="absolute top-6 right-6 flex flex-col items-end gap-1.5">
+      {/* Top-right wind information block - Above background */}
+      <div className="absolute top-6 right-6 flex flex-col items-end gap-1.5 z-30">
         {/* Wind speed */}
         <div className="flex items-baseline gap-1.5">
           <span className="text-3xl font-extrabold text-white">
@@ -203,13 +208,13 @@ function WindCard({ weatherData }) {
         </div>
       </div>
 
-      {/* Wind Turbine centered - moved down to prevent blade clipping */}
-      <div className="flex justify-center mb-6 mt-16">
+      {/* Wind Turbine centered - on top of background */}
+      <div className="flex justify-center mb-6 mt-16 relative z-10">
         <WindTurbine windSpeed={speed} />
       </div>
 
-      {/* Info cards grid at bottom */}
-      <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      {/* Info cards grid at bottom - Above background */}
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 relative z-20">
         <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-3 text-center">
           <div className="mb-1.5 flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-400">
             <Wind className="h-3.5 w-3.5 text-sky-400" /> Gust
