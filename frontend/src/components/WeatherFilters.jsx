@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, Loader2, X } from 'lucide-react'
+import SearchedCitiesCache from './SearchedCitiesCache'
 import {
   getAllCountries,
   getStatesByCountry,
@@ -243,77 +244,30 @@ function WeatherConditionCard({ condition, isSelected, onClick }) {
 }
 
 function CityCard({ city, index, onSelect, weatherCode }) {
-  // Get weather-specific animations based on weather code
-  const getWeatherAnimation = () => {
-    if ([95, 96, 99].includes(weatherCode)) {
-      // Thunderstorm - shake effect
-      return {
-        animate: { y: [0, -2, 0] },
-        transition: { repeat: Infinity, duration: 0.8, ease: 'easeInOut' }
-      }
-    } else if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(weatherCode)) {
-      // Rain - gentle float
-      return {
-        animate: { y: [0, -4, 0] },
-        transition: { repeat: Infinity, duration: 2, ease: 'easeInOut' }
-      }
-    } else if ([71, 73, 75, 77, 85, 86].includes(weatherCode)) {
-      // Snow - slow float
-      return {
-        animate: { y: [0, -3, 0] },
-        transition: { repeat: Infinity, duration: 3, ease: 'easeInOut' }
-      }
-    }
-    // Default sunny - subtle bounce
-    return {
-      animate: { y: [0, -2, 0] },
-      transition: { repeat: Infinity, duration: 2.5, ease: 'easeInOut' }
-    }
-  }
-
-  const weatherAnim = getWeatherAnimation()
-
   return (
     <motion.div
       key={`${city.name}-${city.latitude}-${city.longitude}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-      className="group cursor-pointer h-full"
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.2, delay: index * 0.02 }}
+      className="group cursor-pointer"
       onClick={() => onSelect(city)}
     >
-      <div className="rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-800/50 to-slate-900/50 p-6 backdrop-blur-md hover:border-blue-500/30 hover:from-slate-800/70 hover:to-slate-900/70 transition-all h-full flex flex-col shadow-lg hover:shadow-blue-500/10">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-white">{city.name}</h3>
-            <p className="text-xs text-slate-400 mt-1">{city.condition}</p>
-          </div>
-          <motion.div
-            className="text-4xl shrink-0 ml-2"
-            initial={{ scale: 1 }}
-            {...weatherAnim}
-          >
-            {city.icon || '🌡️'}
-          </motion.div>
+      <div className="rounded-lg border border-slate-700/50 bg-gradient-to-br from-slate-800/60 to-slate-900/60 p-3 backdrop-blur-sm hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all hover:scale-105">
+        {/* Icon & Temp */}
+        <div className="flex items-start justify-between mb-2">
+          <span className="text-2xl">{city.icon || '🌡️'}</span>
+          <span className="text-sm font-bold text-blue-300">{Math.round(city.temp)}°C</span>
         </div>
 
-        {/* Temperature Display */}
-        <div className="bg-slate-900/40 rounded-xl p-4 mb-4">
-          <div className="text-3xl font-bold text-white">{Math.round(city.temp)}°C</div>
-        </div>
+        {/* City Info */}
+        <h4 className="text-xs font-semibold text-white truncate">{city.name}</h4>
+        <p className="text-xs text-slate-400 truncate mb-2">{city.condition}</p>
 
-        {/* Details Grid */}
-        <div className="space-y-3 flex-1">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-400">Humidity</span>
-            <span className="font-semibold text-slate-200">{city.humidity}%</span>
-          </div>
-          <div className="h-px bg-slate-800/50" />
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-400">Wind</span>
-            <span className="font-semibold text-slate-200">{Math.round(city.wind_speed)} km/h</span>
-          </div>
+        {/* Quick Stats */}
+        <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+          <span>💧 {city.humidity}%</span>
+          <span>💨 {Math.round(city.wind_speed)} km/h</span>
         </div>
 
         {/* Button */}
@@ -322,9 +276,9 @@ function CityCard({ city, index, onSelect, weatherCode }) {
             e.stopPropagation()
             onSelect(city)
           }}
-          className="w-full mt-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:shadow-lg hover:shadow-blue-500/30 transition-all active:scale-95 group-hover:from-blue-500 group-hover:to-blue-400"
+          className="w-full py-1.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg font-bold text-xs uppercase hover:shadow-lg hover:shadow-blue-500/20 transition-all active:scale-95"
         >
-          View Details
+          Select
         </button>
       </div>
     </motion.div>
@@ -412,7 +366,7 @@ function CityResultsModal({ cities, isOpen, onClose, onSelectCity, selectedCount
                     <p className="text-slate-500 text-sm">Try selecting a different weather condition.</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                     {cities.map((city, index) => (
                       <CityCard
                         key={`${city.name}-${city.latitude}-${city.longitude}-${index}`}
@@ -446,6 +400,8 @@ export default function WeatherFilters({ onSelectCity }) {
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState([])
   const [showResults, setShowResults] = useState(false)
+
+  const cacheRef = useRef(null)
 
   useEffect(() => {
     const loadCountries = async () => {
@@ -601,6 +557,23 @@ export default function WeatherFilters({ onSelectCity }) {
       country: selectedCountry?.name || '',
     }
 
+    // Add to cache with weather details
+    const cacheData = {
+      name: cityData.name,
+      country: selectedCountry?.name || cityData.country || '',
+      temp: cityData.temp || 0,
+      condition: cityData.condition || 'Unknown',
+      humidity: cityData.humidity || 0,
+      wind: cityData.wind_speed || 0,
+      icon: cityData.icon || '🌡️',
+      latitude: cityData.latitude,
+      longitude: cityData.longitude,
+    }
+
+    if (cacheRef.current?.addCityToCache) {
+      cacheRef.current.addCityToCache(cacheData)
+    }
+
     // Reset filters after selection
     resetFilters()
     onSelectCity?.(cityObject)
@@ -695,6 +668,21 @@ export default function WeatherFilters({ onSelectCity }) {
             ))}
           </div>
         </motion.div>
+
+      {/* Recently Searched Cities Cache - 30 min */}
+      <SearchedCitiesCache
+        ref={cacheRef}
+        onSelectCity={(cityData) => {
+          const cachedCityObject = {
+            name: cityData.name,
+            latitude: cityData.latitude,
+            longitude: cityData.longitude,
+            state: selectedState?.name || '',
+            country: cityData.country || '',
+          }
+          onSelectCity?.(cachedCityObject)
+        }}
+      />
 
       {/* Find Cities Button */}
       {selectedCountry && selectedState && (

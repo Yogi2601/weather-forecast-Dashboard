@@ -1,27 +1,66 @@
 import requests
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_coordinates(city_name: str):
-    url = (
-        f"https://geocoding-api.open-meteo.com/v1/search?name={city_name}&count=1"
-    )
+    """
+    Get coordinates for a city using Open Meteo Geocoding API.
+    Supports cities worldwide.
 
-    response = requests.get(url)
+    Args:
+        city_name (str): City name (e.g., "Dhule City", "New York", "London")
 
-    if response.status_code != 200:
+    Returns:
+        dict: {latitude, longitude, city, country} or None if not found
+    """
+
+    if not city_name or not city_name.strip():
         return None
 
-    data = response.json()
+    city_name = city_name.strip()
 
-    if "results" not in data:
+    try:
+        # Try with full city name first
+        url = (
+            f"https://geocoding-api.open-meteo.com/v1/search?"
+            f"name={city_name}&count=5&language=en"
+        )
+
+        response = requests.get(url, timeout=5)
+
+        if response.status_code != 200:
+            logger.warning(f"Geocoding API error for {city_name}: {response.status_code}")
+            return None
+
+        data = response.json()
+
+        if "results" not in data or not data["results"]:
+            logger.warning(f"No results found for city: {city_name}")
+            return None
+
+        # Get the first (most relevant) result
+        city = data["results"][0]
+
+        result = {
+            "latitude": city.get("latitude"),
+            "longitude": city.get("longitude"),
+            "city": city.get("name", city_name),
+            "country": city.get("country", "Unknown"),
+            "admin1": city.get("admin1", ""),
+            "admin2": city.get("admin2", ""),
+        }
+
+        logger.info(f"Found coordinates for {city_name}: {result['city']}, {result['country']}")
+        return result
+
+    except requests.Timeout:
+        logger.error(f"Timeout while fetching coordinates for {city_name}")
         return None
-
-    city = data["results"][0]
-
-    return {
-        "latitude": city["latitude"],
-        "longitude": city["longitude"],
-    }
+    except Exception as e:
+        logger.error(f"Error fetching coordinates for {city_name}: {str(e)}")
+        return None
 
 
 def reverse_geocode(latitude: float, longitude: float):

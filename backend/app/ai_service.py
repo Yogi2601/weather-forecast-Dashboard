@@ -255,7 +255,7 @@ def call_gemini_api(
         # Set generation config based on response mode with optimal parameters
         mode_config = get_mode_config(response_mode)
         generation_config = {
-            "max_output_tokens": mode_config.get("max_length", 1000),
+            "max_output_tokens": mode_config.get("max_length", 2000),
             "temperature": 0.7,
             "top_p": 0.9,
             "top_k": 40,
@@ -265,11 +265,16 @@ def call_gemini_api(
         logger.info(f"Calling Gemini API with model {GEMINI_MODEL}, mode: {response_mode}")
 
         try:
+            logger.debug(f"Gemini request config: {generation_config}")
+
             response = gemini_client.models.generate_content(
                 model=GEMINI_MODEL,
                 contents=complete_prompt,
                 config=generation_config
             )
+
+            logger.debug(f"Gemini response object: {response}")
+            logger.debug(f"Gemini response type: {type(response)}")
 
             # Extract and clean response text
             if response and hasattr(response, 'text') and response.text:
@@ -277,14 +282,19 @@ def call_gemini_api(
                 logger.info("Gemini API call successful")
                 return cleaned_response
             else:
-                logger.warning(f"Gemini returned empty response: {response}")
+                logger.warning(f"Gemini returned empty or invalid response")
+                logger.warning(f"Response object: {response}")
+                if hasattr(response, 'candidates'):
+                    logger.warning(f"Response candidates: {response.candidates}")
+                if hasattr(response, 'content'):
+                    logger.warning(f"Response content: {response.content}")
                 return None
 
         except TimeoutError as e:
             logger.error(f"Gemini API timeout after {GEMINI_TIMEOUT}s: {str(e)}", exc_info=True)
             return None
         except Exception as e:
-            logger.error(f"Gemini API call error: {str(e)}", exc_info=True)
+            logger.error(f"Gemini API call error: {type(e).__name__}: {str(e)}", exc_info=True)
             return None
 
     except Exception as e:
@@ -399,7 +409,8 @@ def analyze_weather_with_ai(
     resolved_context, city_query_info = context_resolver.resolve_context(
         user_question=user_question,
         current_context=context,
-        conversation_history=previous_messages
+        conversation_history=previous_messages,
+        conversation_id=conversation_id
     )
 
     # If resolution failed or detected an invalid city

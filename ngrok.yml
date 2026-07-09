@@ -1,0 +1,12 @@
+authtoken: YOUR_NGROK_TOKEN_HERE
+
+tunnels:
+  backend:
+    proto: http
+    addr: 8000
+    bind_tls: true
+
+  frontend:
+    proto: http
+    addr: 5173
+    bind_tls: true

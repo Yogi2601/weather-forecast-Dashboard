@@ -292,7 +292,14 @@ def is_followup_question(
         # Check for follow-up keywords
         followup_keywords = [
             'what about',
+            'will it',
+            'is it',
+            'how',
+            'when',
+            'where',
+            'why',
             'and',
+            'but',
             'tomorrow',
             'next',
             'week',
@@ -304,6 +311,19 @@ def is_followup_question(
             'tell me',
             'more',
             'also',
+            'too',
+            'there',
+            'rain',
+            'snow',
+            'cold',
+            'hot',
+            'wind',
+            'humidity',
+            'temperature',
+            'forecast',
+            'predict',
+            'chance',
+            'probability',
         ]
 
         question_lower = current_question.lower()

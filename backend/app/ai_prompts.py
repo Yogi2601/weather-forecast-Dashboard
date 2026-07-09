@@ -107,19 +107,19 @@ RESPONSE_MODES = {
         "name": "Quick Response",
         "description": "Brief, friendly answer (1-3 sentences)",
         "prompt_addition": QUICK_RESPONSE_PROMPT,
-        "max_length": 300,
+        "max_length": 500,  # Increased from 300
     },
     "detailed": {
         "name": "Detailed Response",
         "description": "Conversational answer with good depth (3-6 sentences)",
         "prompt_addition": DETAILED_RESPONSE_PROMPT,
-        "max_length": 1000,
+        "max_length": 2000,  # Increased from 1000 (was too short!)
     },
     "expert": {
         "name": "Expert Analysis",
         "description": "In-depth professional analysis (5+ paragraphs)",
         "prompt_addition": EXPERT_ANALYSIS_PROMPT,
-        "max_length": 2000,
+        "max_length": 4000,  # Increased from 2000
     },
 }
 
